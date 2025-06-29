@@ -1,20 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
+
 import { StyleSheet, Text, View } from 'react-native';
+import { AuthProvider, useAuth } from './src/hooks/useAuth';
+import AppNavigator from './src/navigation/AppNavigator';
+import LoginScreen from './src/screens/auth/LoginScreen';
+import RootNavigator from './src/navigation/RootNavigator';
 
 export default function App() {
+
+  function Root(){
+    const {isLoggedIn} = useAuth();
+    return isLoggedIn ? <AppNavigator/> : <LoginScreen/>;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthProvider>
+      <RootNavigator/>
+    </AuthProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
 });
