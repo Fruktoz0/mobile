@@ -43,8 +43,10 @@ const AppNavigator = () => {
             renderScene={renderScene}
             barStyle={styles.bar}
             activeColor="#6BAEA1"
+            tabBarActiveBackgroundColor="#eff6f4"
             inactiveColor="#deedea"
             renderIcon={renderIcon}
+        
             >
         </BottomNavigation>
     )

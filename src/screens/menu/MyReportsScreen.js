@@ -30,10 +30,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   header: {
-    paddingTop: 32,
+    paddingTop: 16,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#cee4df',
+ 
   }
 })
