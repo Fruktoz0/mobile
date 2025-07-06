@@ -18,6 +18,9 @@ const ReportScreen = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false)
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -78,11 +81,11 @@ const ReportScreen = () => {
   const isFormValid =
     title.trim() !== '' &&
     description.trim() !== '' &&
+    zipCode.trim() !== '' &&
+    address.trim() !== '' &&
+    city.trim() !== '' &&
     categoryId !== '' &&
     images.length > 0;
-  location !== null;
-
-
 
 
   //Adatok beküldése
@@ -94,6 +97,9 @@ const ReportScreen = () => {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('categoryId', categoryId);
+      formData.append('address', address);
+      formData.append('city', city);
+      formData.append('zipCode', zipCode);
       if (location) {
         formData.append('locationLat', location.latitude.toString());
         formData.append('locationLng', location.longitude.toString());
@@ -132,6 +138,9 @@ const ReportScreen = () => {
       setCategoryId('');
       setImages([]);
       setLocation(null);
+      setAddress('');
+      setCity('');
+      setZipCode('');
 
     } catch (error) {
       console.error('Hiba a beküldés során:', error.response?.data || error.message);
@@ -219,6 +228,36 @@ const ReportScreen = () => {
               ))}
             </Picker>
           </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+            <TextInput
+              label="Város"
+              value={city}
+              onChangeText={setCity}
+              mode="outlined"
+              outlineColor="rgba(107, 174, 161, 0.3)"
+              style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
+              theme={{ colors: { primary: '#6db2a1' } }}
+            />
+            <TextInput
+              label="Irányítószám"
+              value={zipCode}
+              onChangeText={setZipCode}
+              mode="outlined"
+              outlineColor="rgba(107, 174, 161, 0.3)"
+              style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
+              theme={{ colors: { primary: '#6db2a1' } }}
+            />
+          </View>
+
+          <TextInput
+            label="Cím (utca, házszám)"
+            value={address}
+            onChangeText={setAddress}
+            mode="outlined"
+            outlineColor="rgba(107, 174, 161, 0.3)"
+            style={[styles.input, { backgroundColor: '#FFFFFF' }]}
+            theme={{ colors: { primary: '#6db2a1' } }}
+          />
 
           <TextInput
             label="Leírás"

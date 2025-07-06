@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
+//Felgasználói adatok lekérése a szerverről
       export const fetchUserData = async (setUserData) => {
             try {
                 const token = await AsyncStorage.getItem('token');
