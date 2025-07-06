@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   cardContent: {
+    padding: 5,
     flexDirection: 'row',
   },
   image: {
