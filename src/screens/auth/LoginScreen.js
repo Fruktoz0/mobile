@@ -30,10 +30,8 @@ const LoginScreen = () => {
             if (response.status === 200) {
                 const token = response.data.token;
                 await AsyncStorage.setItem('token', token);
+                navigation.replace('MainTabs')
 
-                Alert.alert('Sikeres bejelentkezés', '', [
-                    { text: 'OK', onPress: () => navigation.replace('MainTabs') }
-                ])
             } else {
                 Alert.alert('Hiba történt', 'Kérjük, ellenőrizze az adatait és próbálja újra.');
             }
