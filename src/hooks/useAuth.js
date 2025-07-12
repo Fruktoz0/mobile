@@ -1,7 +1,7 @@
 import {  createContext, useContext, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { authService } from '../services/authService'
-import React from 'react'
+
 
 const AuthContext = createContext()
 

@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react'
 import { Dimensions } from 'react-native';
 import axios from 'axios';
+import { API_URL } from '../../config/apiConfig'; 
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -25,7 +26,7 @@ const RegisterScreen = () => {
       return;
     }
     try {
-      const response = await axios.post('http://192.168.1.64:3000/api/auth/register', {
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         username,
         email,
         password

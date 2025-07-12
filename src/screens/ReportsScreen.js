@@ -3,6 +3,7 @@ import { Card, Badge, IconButton, Divider, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import { API_URL } from '../config/apiConfig'
 
 
 
@@ -14,7 +15,7 @@ const ReportsScreen = () => {
   useEffect(() => {
     const fetchAllReports = async () => {
       try {
-        const response = await axios.get('http://192.168.1.64:3000/api/reports/getAllReports')
+        const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
         const reports = response.data;
         console.log('Lekért reportok:', reports);
         setReports(reports);
@@ -51,7 +52,7 @@ const ReportsScreen = () => {
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Card.Cover source={{ uri: `http://192.168.1.64:3000${item.reportImages[0]?.imageUrl}`, }} style={styles.image} />
+              <Card.Cover source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}`, }} style={styles.image} />
 
               <View style={styles.rightContent}>
                 <Text style={styles.date}>{item.createdAt}</Text>

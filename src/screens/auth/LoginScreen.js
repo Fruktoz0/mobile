@@ -6,14 +6,15 @@ import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../config/apiConfig';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const LoginScreen = () => {
 
     const { login } = useAuth();
-    const [ email, setEmail ] = useState('');
-    const [password, setPassword ] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const navigation = useNavigation();
 
     const handleLogin = async () => {
@@ -22,21 +23,21 @@ const LoginScreen = () => {
             return;
         }
         try {
-           const response = await axios.post('http://192.168.1.64:3000/api/auth/login', {
-            email,
-            password
-           });
-           if (response.status === 200){
-            const token = response.data.token;
-            await AsyncStorage.setItem('token', token);
-            
-            Alert.alert('Sikeres bejelentkezés', '',[
-                { text: 'OK', onPress: () => navigation.replace('MainTabs')}             
-            ])
-           } else {
-            Alert.alert('Hiba történt', 'Kérjük, ellenőrizze az adatait és próbálja újra.');
-           }
-           
+            const response = await axios.post(`${API_URL}/api/auth/login`, {
+                email,
+                password
+            });
+            if (response.status === 200) {
+                const token = response.data.token;
+                await AsyncStorage.setItem('token', token);
+
+                Alert.alert('Sikeres bejelentkezés', '', [
+                    { text: 'OK', onPress: () => navigation.replace('MainTabs') }
+                ])
+            } else {
+                Alert.alert('Hiba történt', 'Kérjük, ellenőrizze az adatait és próbálja újra.');
+            }
+
         } catch (error) {
             console.error('Bejelentkezési hiba:', error);
             alert('Hibás email vagy jelszó. Kérjük, próbálja újra.');

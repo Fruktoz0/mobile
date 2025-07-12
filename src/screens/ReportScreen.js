@@ -8,6 +8,7 @@ import { Picker } from '@react-native-picker/picker';
 import MapView, { Marker } from 'react-native-maps'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { API_URL } from '../config/apiConfig'; 
 
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -72,12 +73,12 @@ const ReportScreen = () => {
 
   //Kategóriák betöltése a szerverről
   useEffect(() => {
-    axios.get('http://192.168.1.64:3000/api/categories/list')
+    axios.get(`${API_URL}/api/categories/list`)
       .then(res => setCategories(res.data))
       .catch(err => console.error('Hiba a kategóriák lekérésekor:', err));
   }, []);
 
-  /*Űrlap érvényességének ellenőrzése: minden mezőnek ki kell lennie töltve + helyadat */
+  //Űrlap érvényességének ellenőrzése: minden mezőnek ki kell lennie töltve + helyadat 
   const isFormValid =
     title.trim() !== '' &&
     description.trim() !== '' &&
@@ -119,7 +120,7 @@ const ReportScreen = () => {
       const token = await AsyncStorage.getItem('token');
 
       const response = await axios.post(
-        'http://192.168.1.64:3000/api/reports/sendReport',
+        `${API_URL/api/reports/sendReport}`,
         formData,
         {
           headers: {

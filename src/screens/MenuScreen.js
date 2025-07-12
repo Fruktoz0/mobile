@@ -4,7 +4,6 @@ import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react'
-import axios from 'axios';
 import { fetchUserData } from '../hooks/fetchUserData';
 
 

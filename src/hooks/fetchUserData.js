@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { API_URL } from "../config/apiConfig";
 
 //Felgasználói adatok lekérése a szerverről
       export const fetchUserData = async (setUserData) => {
@@ -7,7 +8,7 @@ import axios from "axios";
                 const token = await AsyncStorage.getItem('token');
                  console.log("Token a lekéréshez:", token);
                 if (token) {
-                    const response = await axios.get('http://192.168.1.64:3000/api/auth/user', {
+                    const response = await axios.get(`${API_URL}/api/auth/user`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setUserData(response.data);
