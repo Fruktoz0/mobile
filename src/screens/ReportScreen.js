@@ -2,14 +2,15 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, Image, Dimensions } fro
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { Button, TextInput, Divider, Snackbar, ActivityIndicator } from 'react-native-paper';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 import { Picker } from '@react-native-picker/picker';
-import MapView, { Marker } from 'react-native-maps'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { API_URL } from '../config/apiConfig'; 
-
+import MapView, { Marker } from 'react-native-maps';
+import {
+  pickImage,
+  fetchCurrentLocation,
+  fetchCategories,
+  sendReport,
+  isFormValid
+} from '../services/reportService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -23,40 +24,14 @@ const ReportScreen = () => {
   const [city, setCity] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [location, setLocation] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-
-  const [categories, setCategories] = useState([])
-
-  /*Képfeltöltés */
-  const pickImage = async () => {
-    if (images.length >= 3) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsMultipleSelection: false,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      setImages([...images, result.assets[0]]);
-    }
-  };
-
-  /*Aktuális pozíció lekérdezése */
-  const fetchCurrentLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Helyhozzáférés megtagadva');
-      return;
-    }
-    const currentLocation = await Location.getCurrentPositionAsync({});
-    setLocation(currentLocation.coords);
-  };
+  const [categories, setCategories] = useState([]);
 
   const handleDeleteImage = (index) => {
     setImages((prevImages) => {
       const newImages = prevImages.filter((_, i) => i !== index);
-      // Az új képek alapján beállítjuk az indexet
       if (newImages.length === 0) setSelectedImageIndex(0);
       else if (index >= newImages.length) setSelectedImageIndex(newImages.length - 1);
       else setSelectedImageIndex(index);
@@ -64,76 +39,24 @@ const ReportScreen = () => {
     });
   };
 
-  //Képek indexének frissítése a képek változásakor
   useEffect(() => {
     if (images.length === 0) setSelectedImageIndex(0);
     else if (selectedImageIndex >= images.length)
       setSelectedImageIndex(images.length - 1);
   }, [images]);
 
-  //Kategóriák betöltése a szerverről
   useEffect(() => {
-    axios.get(`${API_URL}/api/categories/list`)
-      .then(res => setCategories(res.data))
+    fetchCategories()
+      .then(setCategories)
       .catch(err => console.error('Hiba a kategóriák lekérésekor:', err));
   }, []);
 
-  //Űrlap érvényességének ellenőrzése: minden mezőnek ki kell lennie töltve + helyadat 
-  const isFormValid =
-    title.trim() !== '' &&
-    description.trim() !== '' &&
-    zipCode.trim() !== '' &&
-    address.trim() !== '' &&
-    city.trim() !== '' &&
-    categoryId !== '' &&
-    images.length > 0;
-
-
-  //Adatok beküldése
   const handleSubmit = async () => {
     try {
-      setLoading(true)
-      const formData = new FormData();
-
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('categoryId', categoryId);
-      formData.append('address', address);
-      formData.append('city', city);
-      formData.append('zipCode', zipCode);
-      if (location) {
-        formData.append('locationLat', location.latitude.toString());
-        formData.append('locationLng', location.longitude.toString());
-      }
-
-      images.forEach((img, idx) => {
-        const fileName = img.uri.split('/').pop();
-        const fileType = fileName.split('.').pop();
-        formData.append('images', {
-          uri: img.uri,
-          name: fileName,
-          type: `image/${fileType}`,
-        });
-      });
-
-
-      const token = await AsyncStorage.getItem('token');
-
-      const response = await axios.post(
-        `${API_URL/api/reports/sendReport}`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      console.log('Sikeres mentés:', response.data);
+      setLoading(true);
+      await sendReport({ title, description, categoryId, address, city, zipCode, location, images });
       setSnackbarMessage('Sikeresen beküldve!');
       setSnackbarVisible(true);
-      //Minden mező alaphelyzetbe állítása
       setTitle('');
       setDescription('');
       setCategoryId('');
@@ -142,7 +65,6 @@ const ReportScreen = () => {
       setAddress('');
       setCity('');
       setZipCode('');
-
     } catch (error) {
       console.error('Hiba a beküldés során:', error.response?.data || error.message);
       setSnackbarMessage('Hiba a beküldés során');
@@ -151,6 +73,8 @@ const ReportScreen = () => {
       setLoading(false);
     }
   };
+
+  const formValid = isFormValid({ title, description, zipCode, address, city, categoryId, images });
 
   return (
     <>
@@ -307,7 +231,7 @@ const ReportScreen = () => {
             mode="contained"
             onPress={handleSubmit}
             style={styles.submitButton}
-            disabled={!isFormValid}
+            disabled={!formValid}
           >
             {loading ? <ActivityIndicator animating color="#fff" /> : 'Bejelentés beküldése'}
           </Button>
