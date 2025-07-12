@@ -3,8 +3,11 @@ import { Card, Badge, IconButton, Divider, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { API_URL } from '../config/apiConfig'
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { ReportDetailScreen } from './ReportDetailScreen';
 
 
 
@@ -13,21 +16,35 @@ const ReportsScreen = () => {
   const [reports, setReports] = useState([])
   const [searchText, setSearchText] = useState('');
 
-  useEffect(() => {
-    const fetchAllReports = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
-        const reports = response.data;
-        console.log('Lekért reportok:', reports);
-        setReports(reports);
-      } catch (error) {
-        console.error('Hiba a reportok lekérdezésében', error);
-      }
-    };
-    fetchAllReports();
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAllReports = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
+          const reports = response.data;
+          setReports(reports);
+        } catch (error) {
+          console.error('Hiba a reportok lekérdezésében', error);
+        }
+      };
+      fetchAllReports();
+    }, [])
+  )
 
 
+
+
+  const getDistrictFromZip = (city, zipCode) => {
+    if (city !== 'Budapest' || typeof zipCode !== 'string' || zipCode.length !== 4) {
+      return city;
+    }
+    const districtNum = parseInt(zipCode.slice(1, 3), 10);
+
+    if (isNaN(districtNum) || districtNum < 1 || districtNum > 23) {
+      return city;
+    }
+    return `${districtNum}. kerület`;
+  };
 
   return (
     <View style={styles.container}>
@@ -51,7 +68,10 @@ const ReportsScreen = () => {
         )}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Card style={styles.card}>
+          <Card 
+          style={styles.card}
+          onPress={() => navigation.navigate('ReportDetail', { report: item })}
+          >
             <View style={styles.cardContent}>
               <Image
                 source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}` }}
@@ -59,7 +79,7 @@ const ReportsScreen = () => {
               />
 
               <View style={styles.rightContent}>
-                  <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
+                <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
                 <View style={styles.topRow}>
                   <Text style={styles.title}>{item.title}</Text>
                 </View>
@@ -77,10 +97,9 @@ const ReportsScreen = () => {
                 <IconButton icon="arrow-down" size={16} onPress={() => { }} />
               </View>
               <Text style={styles.address}>
-                {item.city === 'Budapest'
-                  ? `${item.address.split(',')[0]}`
-                  : item.city}
+                {getDistrictFromZip(item.city, item.zipCode)}
               </Text>
+
             </View>
           </Card>
 
@@ -157,7 +176,7 @@ const styles = StyleSheet.create({
   },
   date: {
     textAlign: 'right',
-    fontSize: 12,
+    fontSize: 10,
     color: '#888',
   },
   description: {
@@ -166,14 +185,14 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     flexShrink: 1,
   },
-bottomRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 12,
-  paddingBottom: 8,
-  marginTop: -8, // opcionális, ha közelebb akarod hozni
-},
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    marginTop: -8, // opcionális, ha közelebb akarod hozni
+  },
   voteContainer: {
     flexDirection: 'row',
     alignItems: 'center',

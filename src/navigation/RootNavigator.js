@@ -10,6 +10,7 @@ import MyChallengesScreen from '../screens/menu/MyChallengesScreen'
 import FaqScreen from '../screens/menu/FaqScreen'
 import LoginScreen from '../screens/auth/LoginScreen'
 import RegisterScreen from '../screens/auth/RegisterScreen'
+import ReportDetailScreen from '../screens/ReportDetailScreen';
 
 
 
@@ -35,6 +36,8 @@ const RootNavigator = () => {
                 <Stack.Screen name="MyBadges" component={BadgesScreen} />
                 <Stack.Screen name="MyChallenges" component={MyChallengesScreen} />
                 <Stack.Screen name="FAQ" component={FaqScreen} />
+                {/* A bejelentések részletei */}
+                <Stack.Screen name="ReportDetail" component={ReportDetailScreen} />
 
 
             </Stack.Navigator>

@@ -14,8 +14,9 @@ export const pickImage = async (images, setImages) => {
         quality: 0.8,
     });
 
-    if (!result.canceled) {
-        setImages([...images, result.assets[0]]);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+        const pickedImage = result.assets[0];
+        setImages([...images, pickedImage]);
     }
 };
 

@@ -26,7 +26,6 @@ const MenuScreen = () => {
                         <Text style={styles.email}>{userData.email}</Text>
                     </View>
                 )}
-
             </View>
             <List.Section>
                 <List.Item style={styles.item} title="Profilom" left={props => <List.Icon {...props} icon="account-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Profile')} />

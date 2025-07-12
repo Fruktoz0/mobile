@@ -11,6 +11,9 @@ import {
   sendReport,
   isFormValid
 } from '../services/reportService';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -119,7 +122,7 @@ const ReportScreen = () => {
           <Button
             mode="outlined"
             icon="camera"
-            onPress={pickImage}
+            onPress={() => pickImage(images, setImages)}
             style={styles.imageButton}
             textColor="#6BAEA1"
             theme={{ colors: { primary: '#6db2a1' } }}
@@ -219,7 +222,7 @@ const ReportScreen = () => {
           <Button
             mode="outlined"
             icon="crosshairs-gps"
-            onPress={fetchCurrentLocation}
+            onPress={() => fetchCurrentLocation(setLocation)}
             style={styles.locationButton}
             textColor="#6BAEA1"
             theme={{ colors: { primary: '#6db2a1' } }}
