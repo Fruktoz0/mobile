@@ -7,7 +7,8 @@ import React, { use, useEffect, useState } from 'react'
 import { API_URL } from '../config/apiConfig'
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-import { ReportDetailScreen } from './ReportDetailScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 
@@ -15,21 +16,33 @@ const ReportsScreen = () => {
   const navigation = useNavigation()
   const [reports, setReports] = useState([])
   const [searchText, setSearchText] = useState('');
+  const [userId, setUserId] = useState(null);
+
+
+
+  const fetchAllReports = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
+      const reports = response.data;
+      setReports(reports);
+    } catch (error) {
+      console.error('Hiba a reportok lekérdezésében', error);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const fetchAllReports = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
-          const reports = response.data;
-          setReports(reports);
-        } catch (error) {
-          console.error('Hiba a reportok lekérdezésében', error);
-        }
-      };
       fetchAllReports();
     }, [])
   )
+
+  useEffect(() => {
+    const loadUserId = async () => {
+      const id = await AsyncStorage.getItem('userId');
+      setUserId(id);
+    };
+    loadUserId();
+  }, []);
 
 
 
@@ -44,6 +57,29 @@ const ReportsScreen = () => {
       return city;
     }
     return `${districtNum}. kerület`;
+  };
+
+
+
+  const handleVote = async (reportId, voteType,) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.post(`${API_URL}/api/votes/vote`, { reportId, voteType }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      // Frissíti a lista adatait
+      fetchAllReports(); // vagy csak azt az egy reportot
+    } catch (err) {
+      console.error('Szavazási hiba:', err.response?.data || err.message);
+    }
+  };
+
+  const getVoteCount = (reportVotes) => {
+    const upvotes = reportVotes.filter(v => v.voteType === 'upvote').length;
+    const downvotes = reportVotes.filter(v => v.voteType === 'downvote').length;
+    return upvotes - downvotes;
   };
 
   return (
@@ -68,9 +104,9 @@ const ReportsScreen = () => {
         )}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Card 
-          style={styles.card}
-          onPress={() => navigation.navigate('ReportDetail', { report: item })}
+          <Card
+            style={styles.card}
+            onPress={() => navigation.navigate('ReportDetail', { report: item })}
           >
             <View style={styles.cardContent}>
               <Image
@@ -93,8 +129,9 @@ const ReportsScreen = () => {
             </View>
             <View style={styles.bottomRow}>
               <View style={styles.voteContainer}>
-                <IconButton icon="arrow-up" size={16} onPress={() => { }} />
-                <IconButton icon="arrow-down" size={16} onPress={() => { }} />
+                <IconButton icon="arrow-up" size={16} onPress={() => handleVote(item.id, 'upvote')} />
+                <Text>{getVoteCount(item.reportVotes)}</Text>
+                <IconButton icon="arrow-down" size={16} onPress={() => handleVote(item.id, 'downvote')} />
               </View>
               <Text style={styles.address}>
                 {getDistrictFromZip(item.city, item.zipCode)}
