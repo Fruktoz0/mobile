@@ -8,6 +8,7 @@ import { API_URL } from '../config/apiConfig'
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 
 
 
@@ -35,15 +36,23 @@ const ReportsScreen = () => {
       fetchAllReports();
     }, [])
   )
-
+  // Token dekódolása és userId beállítása
   useEffect(() => {
-    const loadUserId = async () => {
-      const id = await AsyncStorage.getItem('userId');
-      setUserId(id);
+    const loadUserIdFromToken = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          console.log('Token dekódolva:', decoded);
+          setUserId(decoded.id);
+        } catch (err) {
+          console.error('Token dekódolási hiba:', err);
+        }
+      }
     };
-    loadUserId();
+    loadUserIdFromToken();
+    console.log('User ID:', userId);
   }, []);
-
 
 
 
@@ -63,11 +72,13 @@ const ReportsScreen = () => {
 
   const handleVote = async (reportId, voteType,) => {
     try {
+
       const token = await AsyncStorage.getItem('token');
       await axios.post(`${API_URL}/api/votes/vote`, { reportId, voteType }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
+
       });
       // Frissíti a lista adatait
       fetchAllReports(); // vagy csak azt az egy reportot
@@ -81,6 +92,12 @@ const ReportsScreen = () => {
     const downvotes = reportVotes.filter(v => v.voteType === 'downvote').length;
     return upvotes - downvotes;
   };
+
+  const getUserVote = (reportVotes) => {
+    return reportVotes.find(vote => vote.userId === userId)?.voteType;
+
+  }
+
 
   return (
     <View style={styles.container}>
@@ -103,46 +120,56 @@ const ReportsScreen = () => {
           report.description.toLowerCase().includes(searchText.toLowerCase())
         )}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <Card
-            style={styles.card}
-            onPress={() => navigation.navigate('ReportDetail', { report: item })}
-          >
-            <View style={styles.cardContent}>
-              <Image
-                source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}` }}
-                style={styles.image}
-              />
+        renderItem={({ item }) => {
+          const userVote = getUserVote(item.reportVotes, userId);
+          return (
+            <Card
+              style={styles.card}
+              onPress={() => navigation.navigate('ReportDetail', { report: item })}
+            >
+              <View style={styles.cardContent}>
+                <Image
+                  source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}` }}
+                  style={styles.image}
+                />
 
-              <View style={styles.rightContent}>
-                <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
-                <View style={styles.topRow}>
-                  <Text style={styles.title}>{item.title}</Text>
+                <View style={styles.rightContent}>
+                  <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
+                  <View style={styles.topRow}>
+                    <Text style={styles.title}>{item.title}</Text>
+                  </View>
+
+                  <Text style={styles.description}>
+                    {item.description.length > 100
+                      ? `${item.description.slice(0, 100)}…`
+                      : item.description}
+                  </Text>
                 </View>
-
-                <Text style={styles.description}>
-                  {item.description.length > 100
-                    ? `${item.description.slice(0, 100)}…`
-                    : item.description}
+              </View>
+              <View style={styles.bottomRow}>
+                <View style={styles.voteContainer}>
+                  <IconButton
+                    icon="arrow-up"
+                    size={16}
+                    iconColor={userVote === 'upvote' ? 'green' : 'black'}
+                    onPress={() => handleVote(item.id, 'upvote')} />
+                  <Text style={styles.vote}>{getVoteCount(item.reportVotes)}</Text>
+                  <IconButton
+                    icon="arrow-down"
+                    size={16}
+                    iconColor={userVote === 'downvote' ? 'red' : 'black'}
+                    onPress={() => handleVote(item.id, 'downvote')} />
+                </View>
+                <Text style={styles.address}>
+                  {getDistrictFromZip(item.city, item.zipCode)}
                 </Text>
+
               </View>
-            </View>
-            <View style={styles.bottomRow}>
-              <View style={styles.voteContainer}>
-                <IconButton icon="arrow-up" size={16} onPress={() => handleVote(item.id, 'upvote')} />
-                <Text>{getVoteCount(item.reportVotes)}</Text>
-                <IconButton icon="arrow-down" size={16} onPress={() => handleVote(item.id, 'downvote')} />
-              </View>
-              <Text style={styles.address}>
-                {getDistrictFromZip(item.city, item.zipCode)}
-              </Text>
-
-            </View>
-          </Card>
+            </Card>
 
 
-
-        )}
+          )
+        }}
       />
 
 
@@ -238,5 +265,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
+  vote: {
+
+  }
 
 })
