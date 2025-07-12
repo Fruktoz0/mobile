@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, FlatList } from 'react-native'
 import { Card, Badge, IconButton, Divider, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
+import { Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { API_URL } from '../config/apiConfig'
 
@@ -52,31 +53,39 @@ const ReportsScreen = () => {
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <View style={styles.cardContent}>
-              <Card.Cover source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}`, }} style={styles.image} />
+              <Image
+                source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}` }}
+                style={styles.image}
+              />
 
               <View style={styles.rightContent}>
-                <Text style={styles.date}>{item.createdAt}</Text>
+                  <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
+                <View style={styles.topRow}>
+                  <Text style={styles.title}>{item.title}</Text>
+                </View>
+
                 <Text style={styles.description}>
                   {item.description.length > 100
                     ? `${item.description.slice(0, 100)}…`
                     : item.description}
                 </Text>
-                <Divider style={styles.dashedDivider} />
-                <View style={styles.bottomRow}>
-                  <View style={styles.voteContainer}>
-                    <IconButton icon="arrow-up" size={16} onPress={() => { }} />
-                    <IconButton icon="arrow-down" size={16} onPress={() => { }} />
-                    <Text>{item.votes}</Text>
-                  </View>
-                  <Text
-                    style={styles.address}
-                  >
-                    {item.city === 'Budapest' ? item.address : item.city}
-                  </Text>
-                </View>
               </View>
             </View>
+            <View style={styles.bottomRow}>
+              <View style={styles.voteContainer}>
+                <IconButton icon="arrow-up" size={16} onPress={() => { }} />
+                <IconButton icon="arrow-down" size={16} onPress={() => { }} />
+              </View>
+              <Text style={styles.address}>
+                {item.city === 'Budapest'
+                  ? `${item.address.split(',')[0]}`
+                  : item.city}
+              </Text>
+            </View>
           </Card>
+
+
+
         )}
       />
 
@@ -92,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAF8',
   },
-  header:{
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 15,
@@ -112,46 +121,59 @@ const styles = StyleSheet.create({
 
   },
   listContent: {
-    padding: 10,
+
   },
   card: {
     backgroundColor: '#FFFFFF',
-    height: 180,
     marginBottom: 12,
-    borderRadius: 3,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
   cardContent: {
-    padding: 5,
     flexDirection: 'row',
+    height: 130,
+    padding: 8,
   },
   image: {
     width: 100,
-    height: '100%',
-    borderRadius: 12,
+    height: "100%",
+    borderRadius: 8,
   },
   rightContent: {
     flex: 1,
-    padding: 8,
+    paddingLeft: 10,
+    justifyContent: 'flex-start',
   },
-  date: {
-    fontSize: 12,
-    color: '#888',
-
-  },
-  description: {
-    marginBottom: 4,
-  },
-  dashedDivider: {
-    borderStyle: 'dashed',
-    borderWidth: 0.5,
-    borderColor: '#aaa',
-    marginVertical: 4,
-  },
-  bottomRow: {
+  topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    flex: 1,
+    marginRight: 8,
+  },
+  date: {
+    textAlign: 'right',
+    fontSize: 12,
+    color: '#888',
+  },
+  description: {
+    fontSize: 13,
+    color: '#333',
+    marginVertical: 4,
+    flexShrink: 1,
+  },
+bottomRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: 12,
+  paddingBottom: 8,
+  marginTop: -8, // opcionális, ha közelebb akarod hozni
+},
   voteContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -160,4 +182,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
+
 })
