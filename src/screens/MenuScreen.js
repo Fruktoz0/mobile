@@ -13,31 +13,52 @@ const MenuScreen = () => {
 
     const [userData, setUserData] = useState(null)
     useEffect(() => {
-       fetchUserData(setUserData)
+        fetchUserData(setUserData)
     }, []);
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Avatar.Image size={64} source={require('../../assets/images/avatar_placeholder.jpg')} />
-                {userData && (
-                    <View>
-                        <Text style={styles.name}>{userData.username}</Text>
-                        <Text style={styles.email}>{userData.email}</Text>
-                    </View>
-                )}
+            <View>
+                <View style={styles.header}>
+                    <Avatar.Image size={64} source={require('../../assets/images/avatar_placeholder.jpg')} />
+                    {userData && (
+                        <View>
+                            <Text style={styles.name}>{userData.username}</Text>
+                            <Text style={styles.email}>{userData.email}</Text>
+                        </View>
+                    )}
+                </View>
+                <List.Section>
+                    <List.Item style={styles.item} title="Profilom" left={props => <List.Icon {...props} icon="account-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Profile')} />
+
+                    <List.Item style={styles.item} title="Bejelentéseim" left={props => <List.Icon {...props} icon="file-document-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyReports')} />
+
+                    <List.Item style={styles.item} title="Jelvényeim" left={props => <List.Icon {...props} icon="trophy-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyBadges')} />
+
+                    <List.Item style={styles.item} title="Kihívásaim" left={props => <List.Icon {...props} icon="trophy-variant-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyChallenges')} />
+
+                    <List.Item style={styles.item} title="GY.I.K" left={props => <List.Icon {...props} icon="help-circle-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('FAQ')} />
+                </List.Section>
+
+                <View style={{ padding: 16 }}>
+                    <Button
+                        mode="outlined"
+                        onPress={async () => {
+                            await AsyncStorage.removeItem('token');
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'Login' }],
+                            });
+                        }}
+                        style={styles.logoutButton}
+                        textColor="#6BAEA1"
+                        theme={{ colors: { primary: '#6db2a1' } }}
+                        
+                    >
+                        Kijelentkezés
+                    </Button>
+                </View>
             </View>
-            <List.Section>
-                <List.Item style={styles.item} title="Profilom" left={props => <List.Icon {...props} icon="account-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Profile')} />
-
-                <List.Item style={styles.item} title="Bejelentéseim" left={props => <List.Icon {...props} icon="file-document-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyReports')} />
-
-                <List.Item style={styles.item} title="Jelvényeim" left={props => <List.Icon {...props} icon="trophy-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyBadges')} />
-
-                <List.Item style={styles.item} title="Kihívásaim" left={props => <List.Icon {...props} icon="trophy-variant-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyChallenges')} />
-
-                <List.Item style={styles.item} title="GY.I.K" left={props => <List.Icon {...props} icon="help-circle-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('FAQ')} />
-            </List.Section>
         </ScrollView>
 
     )
@@ -71,5 +92,14 @@ const styles = StyleSheet.create({
     item: {
         marginTop: 10,
 
+    },
+    logoutButton:{
+    borderColor: "#6BAEA1",
+    borderWidth: 1.5,
+    borderRadius: 8,
+    marginTop: 16,
+    marginBottom: 16,
+    marginHorizontal: 10
     }
+
 })

@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   header: {
-    paddingTop: 16,
+    marginStart: 16,
+    paddingTop: 32,
     paddingBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',

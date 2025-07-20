@@ -86,3 +86,13 @@ export const isFormValid = ({ title, description, zipCode, address, city, catego
         images.length > 0
     );
 };
+
+export const fetchUserReports = async () => {
+    const token = await AsyncStorage.getItem("token")
+    const response = await axios.get(`${API_URL}/api/reports/userReports`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    return response.data
+}
