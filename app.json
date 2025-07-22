@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "TisztaVaros",
     "slug": "tisztavaros",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/tisztavaros_logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/tisztavaros_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,11 +17,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.fruktoz.tisztavaros"
+      "package": "com.fruktoz.tisztavaros",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
