@@ -4,20 +4,20 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
+    "production": {
+      "env": {
+        "NODE_ENV": "production"
+      },
       "distribution": "internal"
     },
     "preview": {
-      "ios":{
-        "simulator": true
-      },
-      "android":{
+      "distribution": "internal",
+      "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
       }
-    },
-    "production": {
-      "autoIncrement": true
     }
   },
   "submit": {

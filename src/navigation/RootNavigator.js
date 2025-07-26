@@ -11,6 +11,7 @@ import FaqScreen from '../screens/menu/FaqScreen'
 import LoginScreen from '../screens/auth/LoginScreen'
 import RegisterScreen from '../screens/auth/RegisterScreen'
 import ReportDetailScreen from '../screens/ReportDetailScreen';
+import InstitutionReportsScreen from '../screens/menu/InstitutionReportsScreen'
 
 
 
@@ -33,6 +34,7 @@ const RootNavigator = () => {
                 {/* A menü oldalak */}
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="MyReports" component={MyReportsScreen} />
+                <Stack.Screen name="InstitutionReports" component={InstitutionReportsScreen} />
                 <Stack.Screen name="MyBadges" component={BadgesScreen} />
                 <Stack.Screen name="MyChallenges" component={MyChallengesScreen} />
                 <Stack.Screen name="FAQ" component={FaqScreen} />

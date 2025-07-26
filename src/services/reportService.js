@@ -87,6 +87,7 @@ export const isFormValid = ({ title, description, zipCode, address, city, catego
     );
 };
 
+//Felhasználói reportok lekérdezése
 export const fetchUserReports = async () => {
     const token = await AsyncStorage.getItem("token")
     const response = await axios.get(`${API_URL}/api/reports/userReports`, {
@@ -96,3 +97,36 @@ export const fetchUserReports = async () => {
     })
     return response.data
 }
+
+//Intézményi bejelentések lekérdezése
+export const fetchAssignedReports = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/api/reports/assignedReports`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+//Státuszváltás intézményi felhasználótól
+export const updateReportStatus = async (reportId, currentStatus, newStatus, comment = 'Mobil státuszváltás') => {
+    const token = await AsyncStorage.getItem("token");
+
+    const payload = {
+        statusId: newStatus,
+    };
+
+    // Csak akkor kell komment, ha nem open ➝ in_progress
+    if (!(currentStatus === 'open' && newStatus === 'in_progress')) {
+        payload.comment = comment;
+    }
+    const response = await axios.post(`${API_URL}/api/reports/${reportId}/status`, payload, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return response.data;
+};
+

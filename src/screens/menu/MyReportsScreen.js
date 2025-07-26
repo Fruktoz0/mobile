@@ -76,6 +76,8 @@ const MyReportsScreen = () => {
                   <View>
                     <Text style={styles.title}>{report.title}</Text>
                     <Text style={styles.date}>{new Date(report.createdAt).toLocaleDateString('hu-HU')}</Text>
+                    <Text style={{color: statusColors[report.status], fontWeight: '600' }}>{statusLabels[report.status]}</Text>
+                    
                   </View>
                 }
                 left={() => <FileWarning size={24} color="#6BAEA1" style={{marginStart: 10}}/>}
@@ -197,6 +199,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   accordionContent: {
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,

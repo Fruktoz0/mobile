@@ -10,11 +10,15 @@ import { fetchUserData } from '../hooks/fetchUserData';
 const MenuScreen = () => {
 
     const navigation = useNavigation()
-
     const [userData, setUserData] = useState(null)
+
     useEffect(() => {
         fetchUserData(setUserData)
     }, []);
+
+    useEffect(() =>{
+        console.log('userData', userData)
+    }, [userData])
 
     return (
         <ScrollView style={styles.container}>
@@ -32,6 +36,16 @@ const MenuScreen = () => {
                     <List.Item style={styles.item} title="Profilom" left={props => <List.Icon {...props} icon="account-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Profile')} />
 
                     <List.Item style={styles.item} title="Bejelentéseim" left={props => <List.Icon {...props} icon="file-document-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyReports')} />
+
+                    {userData?.role === "institution" && userData?.institutionId && (
+                        <List.Item
+                            style={styles.item}
+                            title={`Intézményem bejelentései (${userData.institution?.name || 'ismeretlen'})`}
+                            left={props => <List.Icon {...props} icon="office-building-outline" />}
+                            right={props => <List.Icon {...props} icon="chevron-right" />}
+                            onPress={() => navigation.navigate('InstitutionReports')}
+                        />
+                    )}
 
                     <List.Item style={styles.item} title="Jelvényeim" left={props => <List.Icon {...props} icon="trophy-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyBadges')} />
 
@@ -53,7 +67,7 @@ const MenuScreen = () => {
                         style={styles.logoutButton}
                         textColor="#6BAEA1"
                         theme={{ colors: { primary: '#6db2a1' } }}
-                        
+
                     >
                         Kijelentkezés
                     </Button>
@@ -93,13 +107,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
 
     },
-    logoutButton:{
-    borderColor: "#6BAEA1",
-    borderWidth: 1.5,
-    borderRadius: 8,
-    marginTop: 16,
-    marginBottom: 16,
-    marginHorizontal: 10
+    logoutButton: {
+        borderColor: "#6BAEA1",
+        borderWidth: 1.5,
+        borderRadius: 8,
+        marginTop: 16,
+        marginBottom: 16,
+        marginHorizontal: 10
     }
 
 })
