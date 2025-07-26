@@ -16,13 +16,9 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "",
-        "backgroundColor": "#ffffff"
-      },
       "edgeToEdgeEnabled": true,
       "package": "com.fruktoz.tisztavaros",
-      "versionCode": 1
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"
