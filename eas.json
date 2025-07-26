@@ -1,26 +1,12 @@
 {
   "cli": {
-    "version": ">= 16.17.0",
-    "appVersionSource": "remote"
+    "version": ">= 6.3.0"
   },
   "build": {
     "production": {
-      "env": {
-        "NODE_ENV": "production"
-      },
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "ios": {
-        "simulator": true
       }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
