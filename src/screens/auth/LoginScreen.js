@@ -1,5 +1,4 @@
 import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
-import { useAuth } from '../../hooks/useAuth'
 import { TextInput, Button, Text } from 'react-native-paper';
 import React, { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +11,6 @@ const { width: screenWidth } = Dimensions.get('window');
 
 const LoginScreen = () => {
 
-    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();

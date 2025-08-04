@@ -4,8 +4,8 @@ import { BottomNavigation } from 'react-native-paper'
 import HomeScreen from '../screens/HomeScreen'
 import MenuScreen from '../screens/MenuScreen'
 import ChallengesScreen from '../screens/ChallengesScreen'
-import Reportcreen from '../screens/ReportScreen'
-import Reportscreen from '../screens/ReportsScreen'
+import ReportScreen from '../screens/ReportScreen'
+import ReportsScreen from '../screens/ReportsScreen'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const AppNavigator = () => {
@@ -20,8 +20,8 @@ const AppNavigator = () => {
 
     const renderScene = BottomNavigation.SceneMap({
         home: HomeScreen,
-        reports: Reportscreen,
-        report: Reportcreen,
+        reports: ReportsScreen,
+        report: ReportScreen,
         challenges: ChallengesScreen,
         menu: MenuScreen,
     })

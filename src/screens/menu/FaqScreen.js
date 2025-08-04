@@ -1,10 +1,14 @@
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import React from 'react'
+import { List, Text } from 'react-native-paper';
+import { useState } from 'react';
+import react from 'react';
 
 
 const FaqScreen = () => {
+
+  const [expanded, setExpanded] = react
 
   const navigation = useNavigation()
   return (
@@ -15,6 +19,9 @@ const FaqScreen = () => {
             <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
             <Text style={styles.backText}>GY.I.K</Text>
           </TouchableOpacity>
+        </View>
+        <View>
+
         </View>
 
 

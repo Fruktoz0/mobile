@@ -5,6 +5,10 @@ import AppNavigator from './src/navigation/AppNavigator';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import RootNavigator from './src/navigation/RootNavigator';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens();
+
 
 export default function App() {
 

@@ -1,3 +1,3 @@
-const LOCAL_IP = "http://185.65.68.235:3000"
+const LOCAL_IP = "https://tisztavaros.duckdns.org"
 
 export const API_URL = LOCAL_IP;
