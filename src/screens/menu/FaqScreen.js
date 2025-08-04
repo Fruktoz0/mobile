@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { List, Text } from 'react-native-paper';
+import { List } from 'react-native-paper';
 import { useState } from 'react';
 import react from 'react';
 
