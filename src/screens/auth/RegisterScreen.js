@@ -4,7 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react'
 import { Dimensions } from 'react-native';
 import axios from 'axios';
-import { API_URL } from '../../config/apiConfig'; 
+import { API_URL } from '../../config/apiConfig';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -42,61 +43,72 @@ const RegisterScreen = () => {
 
     } catch (error) {
       console.error('Registration error:', error);
-    
+
       Alert.alert('Hiba történt a regisztráció során. Kérjük, próbálja újra.');
     }
 
   }
 
   return (
-    <View style={styles.container}>
-      <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
-      <Text style={styles.title}>REGISZTRÁCIÓ</Text>
+    <KeyboardAwareScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+      extraScrollHeight={20}
+      enableOnAndroid={true}
+      keyboardShouldPersistTaps="handled"
+      
+    >
+      <View style={styles.container}>
+        <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
+        <Text style={styles.title}>REGISZTRÁCIÓ</Text>
 
-      <TextInput
-        label={"Felhasználónév"}
-        value={username}
-        onChangeText={setUserName}
-        mode="outlined"
-        style={styles.input}
-        theme={{ colors: { primary: '#6db2a1' } }}
-      />
-      <TextInput
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        mode="outlined"
-        style={styles.input}
-        theme={{ colors: { primary: '#6db2a1' } }}
-      />
-      <TextInput
-        label="Jelszó"
-        value={password}
-        onChangeText={setPassword}
-        mode="outlined"
-        secureTextEntry
-        style={styles.input}
-        theme={{ colors: { primary: '#6db2a1' } }}
-      />
-      <TextInput
-        label="Jelszó megerősítése"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        mode="outlined"
-        secureTextEntry
-        theme={{ colors: { primary: '#6db2a1' } }}
-        style={styles.input}
-      />
+        <TextInput
+          label={"Felhasználónév"}
+          value={username}
+          onChangeText={setUserName}
+          mode="outlined"
+          style={styles.input}
+          theme={{ colors: { primary: '#6db2a1' } }}
+        />
+        <TextInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          mode="outlined"
+          style={styles.input}
+          theme={{ colors: { primary: '#6db2a1' } }}
+        />
+        <TextInput
+          label="Jelszó"
+          value={password}
+          onChangeText={setPassword}
+          mode="outlined"
+          secureTextEntry
+          style={styles.input}
+          theme={{ colors: { primary: '#6db2a1' } }}
+        />
+        <TextInput
+          label="Jelszó megerősítése"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          mode="outlined"
+          secureTextEntry
+          theme={{ colors: { primary: '#6db2a1' } }}
+          style={styles.input}
+        />
 
-      <Button mode="contained" onPress={handleRegister} style={styles.button}>
-        REGISZTRÁCIÓ
-      </Button>
+        <Button mode="contained" onPress={handleRegister} style={styles.button}>
+          REGISZTRÁCIÓ
+        </Button>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.link}>Van már fiókod? <Text style={styles.linkHighlight}>Bejelentkezés</Text></Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.link}>Van már fiókod? <Text style={styles.linkHighlight}>Bejelentkezés</Text></Text>
+        </TouchableOpacity>
 
-    </View>
+      </View>
+
+    </KeyboardAwareScrollView>
+
   )
 }
 

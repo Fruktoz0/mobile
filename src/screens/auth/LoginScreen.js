@@ -1,11 +1,12 @@
 import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
 import { TextInput, Button, Text } from 'react-native-paper';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../config/apiConfig';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -41,45 +42,47 @@ const LoginScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
-            <Text style={styles.title}>BEJELENTKEZÉS</Text>
+ 
+            <View style={styles.container}>
+                <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
+                <Text style={styles.title}>BEJELENTKEZÉS</Text>
 
-            <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-            <TextInput
-                label="Jelszó"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
+                <TextInput
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+                <TextInput
+                    label="Jelszó"
+                    value={password}
+                    onChangeText={setPassword}
+                    mode="outlined"
+                    secureTextEntry
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
 
-            <Button
-                mode="contained"
-                onPress={handleLogin}
-                style={styles.button}
-            >
-                BEJELENTKEZÉS
-            </Button>
-            <View style={styles.divider} />
+                <Button
+                    mode="contained"
+                    onPress={handleLogin}
+                    style={styles.button}
+                >
+                    BEJELENTKEZÉS
+                </Button>
+                <View style={styles.divider} />
 
-            <TouchableOpacity style={styles.googleButton}>
-                <Image source={require('../../../assets/images/google.svg')} style={styles.googleIcon} />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.googleButton}>
+                    <Image source={require('../../../assets/images/google.svg')} style={styles.googleIcon} />
+                </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
-            </TouchableOpacity>
-        </View>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
+                </TouchableOpacity>
+            </View>
+
     )
 }
 

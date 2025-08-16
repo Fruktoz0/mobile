@@ -11,13 +11,12 @@ import {
   sendReport,
   isFormValid
 } from '../services/reportService';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const ReportScreen = () => {
+
   const [images, setImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [title, setTitle] = useState('');
@@ -28,8 +27,6 @@ const ReportScreen = () => {
   const [zipCode, setZipCode] = useState('');
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
   const [categories, setCategories] = useState([]);
 
   const handleDeleteImage = (index) => {
@@ -58,8 +55,6 @@ const ReportScreen = () => {
     try {
       setLoading(true);
       await sendReport({ title, description, categoryId, address, city, zipCode, location, images });
-      setSnackbarMessage('Sikeresen beküldve!');
-      setSnackbarVisible(true);
       setTitle('');
       setDescription('');
       setCategoryId('');
@@ -68,10 +63,9 @@ const ReportScreen = () => {
       setAddress('');
       setCity('');
       setZipCode('');
+
     } catch (error) {
       console.error('Hiba a beküldés során:', error.response?.data || error.message);
-      setSnackbarMessage('Hiba a beküldés során');
-      setSnackbarVisible(true);
     } finally {
       setLoading(false);
     }
@@ -240,16 +234,6 @@ const ReportScreen = () => {
           </Button>
         </View>
       </ScrollView>
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={3000}
-        style={{
-          backgroundColor: 'rgba(107, 174, 161, 0.3)',
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar>
     </>
 
   );

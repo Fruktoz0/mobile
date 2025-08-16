@@ -1,14 +1,24 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
 
-const authService = () => {
-  return (
-    <View>
-      <Text>authService</Text>
-    </View>
-  )
-}
+export const getToken = async () => {
+  try {
+    return await AsyncStorage.getItem("token");
+  } catch (err) {
+    console.error("Token lekérés hiba:", err);
+    return null;
+  }
+};
 
-export default authService
+export const getCurrentUser = async () => {
+  try {
+    const token = await getToken();
+    if (!token) return null;
 
-const styles = StyleSheet.create({})
+    const decoded = jwtDecode(token);
+    return decoded;
+  } catch (err) {
+    console.error("User decode hiba:", err);
+    return null;
+  }
+};

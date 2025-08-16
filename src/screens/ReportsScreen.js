@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, FlatList } from 'react-native'
-import { Card, Badge, IconButton, Divider, Searchbar } from 'react-native-paper'
+import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native'
+import { Card, Badge, IconButton, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { Image } from 'react-native'
@@ -18,6 +18,7 @@ const ReportsScreen = () => {
   const [reports, setReports] = useState([])
   const [searchText, setSearchText] = useState('');
   const [userId, setUserId] = useState(null);
+  const [refreshing, setRefreshing] = useState(false); // ← pull to refresh állapot
 
 
 
@@ -31,11 +32,20 @@ const ReportsScreen = () => {
     }
   };
 
+  //Ha képernyőre fokusz kerül frissít
   useFocusEffect(
     useCallback(() => {
       fetchAllReports();
     }, [])
   )
+  //Pull-to-refresh lehúzással
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAllReports();
+    setRefreshing(false);
+  };
+
+
   // Token dekódolása és userId beállítása
   useEffect(() => {
     const loadUserIdFromToken = async () => {
@@ -166,10 +176,11 @@ const ReportsScreen = () => {
 
               </View>
             </Card>
-
-
           )
         }}
+        refreshControl={ // ← lehúzásra frissítés
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#009688']} />
+        }
       />
 
 
