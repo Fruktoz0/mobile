@@ -22,13 +22,18 @@ export const pickImage = async (images, setImages) => {
 
 // Pozíció lekérése 
 export const fetchCurrentLocation = async (setLocation) => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-        console.log('Helyhozzáférés megtagadva');
-        return;
+    try {
+        //Engedély bekérése felhasználótól
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Helyhozzáférési engedély megtagadva');
+            return;
+        }
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation.coords);
+    } catch (error) {
+        console.error('Hiba a hely lekérése során:', error);
     }
-    const currentLocation = await Location.getCurrentPositionAsync({});
-    setLocation(currentLocation.coords);
 };
 
 // Kategóriák betöltése 

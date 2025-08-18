@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 
+
 const HomeScreen = () => {
   const navigation = useNavigation();
 
@@ -70,9 +71,8 @@ const HomeScreen = () => {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} />
-          <Text style={styles.headerTitle}>Tiszta Város</Text>
+          <Text style={styles.headerTitle}>Hírek és információk</Text>
         </View>
-        <Text style={styles.headerSubtitle}>Hírek és információk</Text>
 
         {/* intézmény csík + szűrő */}
         <View style={styles.stripRow}>
@@ -110,7 +110,7 @@ const HomeScreen = () => {
           const inst = institutions.find(i => i.id === item.institutionId);
 
           return (
-            <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={() => navigation.navigate('NewsDetails', { id: item.id })}>
               <View style={styles.logoWrap}>
                 {inst?.logo ? (
                   <Image source={{ uri: inst.logo }} style={styles.logo} />

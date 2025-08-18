@@ -53,7 +53,12 @@ const AddNewsScreen = ({ navigation }) => {
     const handleSubmit = async () => {
         try {
             setLoading(true);
-            await addNews({ title, content, institutionId, images });
+            await addNews({ 
+                title, 
+                content, 
+                institutionId, 
+                image: images.length > 0 ? images[0].uri : null
+             });
             setTitle('');
             setContent('');
             setInstitutionId('');

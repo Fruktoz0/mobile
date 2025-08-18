@@ -13,6 +13,10 @@ import RegisterScreen from '../screens/auth/RegisterScreen'
 import ReportDetailScreen from '../screens/ReportDetailScreen';
 import InstitutionReportsScreen from '../screens/menu/InstitutionReportsScreen'
 import AddNewsScreen from '../screens/menu/AddNewsScreen'
+import NewsDetailsScreen from '../screens/NewsDetailsScreen'
+import InformationScreen from '../screens/profil/InformationScreen'
+import SettingsScreen from '../screens/profil/SettingsScreen'
+import UserdataScreen from '../screens/profil/UserdataScreen'
 
 
 
@@ -34,7 +38,6 @@ const RootNavigator = () => {
 
                 {/* A menü oldalak */}
                 <Stack.Screen name="Profile" component={ProfileScreen} />
-                <Stack.Screen name="AddNews" component={AddNewsScreen} />
                 <Stack.Screen name="MyReports" component={MyReportsScreen} />
                 <Stack.Screen name="InstitutionReports" component={InstitutionReportsScreen} />
                 <Stack.Screen name="MyBadges" component={BadgesScreen} />
@@ -42,7 +45,14 @@ const RootNavigator = () => {
                 <Stack.Screen name="FAQ" component={FaqScreen} />
                 {/* A bejelentések részletei */}
                 <Stack.Screen name="ReportDetail" component={ReportDetailScreen} />
+                {/* A Hírek részletei */}
+                <Stack.Screen name="AddNews" component={AddNewsScreen} />
+                <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
 
+                {/* Profil oldalak */}  
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="Information" component={InformationScreen} />
+                <Stack.Screen name="Userdata" component={UserdataScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>

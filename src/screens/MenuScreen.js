@@ -16,7 +16,7 @@ const MenuScreen = () => {
         fetchUserData(setUserData)
     }, []);
 
-    useEffect(() =>{
+    useEffect(() => {
         console.log('userData', userData)
     }, [userData])
 
@@ -24,7 +24,14 @@ const MenuScreen = () => {
         <ScrollView style={styles.container}>
             <View>
                 <View style={styles.header}>
-                    <Avatar.Image size={64} source={require('../../assets/images/avatar_placeholder.jpg')} />
+                    <Avatar.Image
+                        size={64}
+                        source={
+                            userData?.avatarStyle && userData?.avatarSeed
+                                ? { uri: `https://api.dicebear.com/9.x/${userData.avatarStyle}/png?seed=${userData.avatarSeed}` }
+                                : require('../../assets/images/avatar_placeholder.jpg')
+                        }
+                    />
                     {userData && (
                         <View>
                             <Text style={styles.name}>{userData.username}</Text>
@@ -54,27 +61,8 @@ const MenuScreen = () => {
                     <List.Item style={styles.item} title="GY.I.K" left={props => <List.Icon {...props} icon="help-circle-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('FAQ')} />
                 </List.Section>
 
-                <View style={{ padding: 16 }}>
-                    <Button
-                        mode="outlined"
-                        onPress={async () => {
-                            await AsyncStorage.removeItem('token');
-                            navigation.reset({
-                                index: 0,
-                                routes: [{ name: 'Login' }],
-                            });
-                        }}
-                        style={styles.logoutButton}
-                        textColor="#6BAEA1"
-                        theme={{ colors: { primary: '#6db2a1' } }}
-
-                    >
-                        Kijelentkezés
-                    </Button>
-                </View>
             </View>
         </ScrollView>
-
     )
 }
 

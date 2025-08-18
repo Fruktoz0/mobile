@@ -97,10 +97,10 @@ android {
     }
     signingConfigs {
         debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            storeFile file('tisztavaros.keystore')
+            storePassword 'TisztaAlma2561'
+            keyAlias 'tisztavaros'
+            keyPassword 'TisztaAlma2561'
         }
     }
     buildTypes {
