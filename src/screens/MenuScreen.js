@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react'
 import { fetchUserData } from '../hooks/fetchUserData';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 
 const MenuScreen = () => {
@@ -12,13 +14,11 @@ const MenuScreen = () => {
     const navigation = useNavigation()
     const [userData, setUserData] = useState(null)
 
-    useEffect(() => {
-        fetchUserData(setUserData)
-    }, []);
-
-    useEffect(() => {
-        console.log('userData', userData)
-    }, [userData])
+    useFocusEffect(
+        useCallback(() => {
+            fetchUserData(setUserData);
+        }, [])
+    );
 
     return (
         <ScrollView style={styles.container}>

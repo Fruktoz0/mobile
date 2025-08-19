@@ -2,7 +2,7 @@ import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TextInput, Button, Text, Label, Avatar, Divider, List } from 'react-native-paper';
+import { Text, Avatar, Divider, List } from 'react-native-paper';
 import { useState, useEffect } from "react"
 import { fetchUserData } from '../../hooks/fetchUserData';
 import { Share2, Settings, User, Info, LogOut, Lock, RefreshCcw } from 'lucide-react-native';
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginStart: 16,
-    paddingTop: 32,
+    paddingTop: 36,
     paddingBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
