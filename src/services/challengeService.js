@@ -33,7 +33,6 @@ export const createChallenge = async (challengeData) => {
         const response = await axios.post(`${API_URL}/api/challenges/create`, formData, {
             headers: {
                 "Authorization": `Bearer ${token}`,
-       
             },
         });
 
