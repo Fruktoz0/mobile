@@ -17,6 +17,9 @@ import NewsDetailsScreen from '../screens/NewsDetailsScreen'
 import InformationScreen from '../screens/profil/InformationScreen'
 import SettingsScreen from '../screens/profil/SettingsScreen'
 import UserdataScreen from '../screens/profil/UserdataScreen'
+import ChallengesScreen from '../screens/ChallengesScreen'
+import ChallengeDetailScreen from '../screens/ChallengeDetailScreen'
+import NewChallengeScreen from '../screens/NewChallangeScreen'
 
 
 
@@ -48,7 +51,10 @@ const RootNavigator = () => {
                 {/* A Hírek részletei */}
                 <Stack.Screen name="AddNews" component={AddNewsScreen} />
                 <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
-
+                {/* Kihívások */}
+                <Stack.Screen name="NewChallenge" component={NewChallengeScreen} />
+                <Stack.Screen name="Challenges" component={ChallengesScreen} />
+                <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} />
                 {/* Profil oldalak */}  
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="Information" component={InformationScreen} />

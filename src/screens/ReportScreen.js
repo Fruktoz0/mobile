@@ -197,8 +197,8 @@ const ReportScreen = () => {
               <MapView
                 style={styles.map}
                 initialRegion={{
-                  latitude: location.latitude,
-                  longitude: location.longitude,
+                  latitude: location.latitude || 0,
+                  longitude: location.longitude || 0,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}

@@ -3,16 +3,37 @@ import { API_URL } from '../config/apiConfig'
 import { Image, Dimensions } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { List, Avatar, Button } from 'react-native-paper'
+import { Avatar, Button, Divider } from 'react-native-paper'
 import Carousel, { Pagination } from 'react-native-reanimated-carousel';
-import { useSharedValue } from 'react-native-reanimated';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { useState, useEffect } from 'react'
 
 const ReportDetailScreen = ({ route }) => {
     const { report } = route.params;
 
     const navigation = useNavigation()
     const { width } = Dimensions.get('window');
-    const progress = useSharedValue(0);
+    const [streetName, setStreetName] = useState(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    useEffect(() => {
+        const fetchAddress = async () => {
+            if (report?.locationLat && report?.locationLng) {
+                try {
+                    const [address] = await Location.reverseGeocodeAsync({
+                        latitude: Number(report.locationLat),
+                        longitude: Number(report.locationLng),
+                    });
+                    setStreetName(address?.street || "Ismeretlen utca");
+                } catch (error) {
+                    console.error("Geocoding hiba:", error);
+                }
+            }
+        };
+
+        fetchAddress();
+    }, [report]);
 
     return (
         <ScrollView style={styles.container}>
@@ -22,12 +43,12 @@ const ReportDetailScreen = ({ route }) => {
                     <Text style={styles.backText}>Bejelentés részletei</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ overflow: 'hidden', borderRadius: 10 }}>
+            <View style={{ overflow: 'hidden', }}>
                 <Carousel
                     width={width}
                     height={250}
                     data={report.reportImages}
-                    onProgressChange={progress}
+                    onSnapToItem={(index) => setActiveIndex(index)}
                     renderItem={({ item }) => (
                         <Image
                             source={{ uri: `${API_URL}${item.imageUrl}` }}
@@ -36,45 +57,106 @@ const ReportDetailScreen = ({ route }) => {
                     )}
                 />
 
-                <Pagination.Basic
-                    progress={progress}
-                    data={report.reportImages}
-                    dotStyle={{
-                        marginTop: 8,
-                        width: 20,             
-                        height: 4,              
-                        borderRadius: 2,        
-                        marginHorizontal: 3,
-                        backgroundColor: '#009688', // aktív szín
-                    }}
-                    inactiveDotStyle={{
-                        backgroundColor: '#ffffffaa',   // szürkésebb inaktív
-                    }}
-                />
+                <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
+                    {report.reportImages.map((_, i) => (
+                        <View
+                            key={i}
+                            style={{
+                                width: 20,
+                                height: 4,
+                                borderRadius: 2,
+                                marginHorizontal: 3,
+                                backgroundColor: i === activeIndex ? '#009688' : '#63646582',
+                            }}
+                        />
+                    ))}
+                </View>
+            </View>
+            <View style={{ paddingHorizontal: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                    <View>
+                        <Avatar.Image
+                            size={32}
+                            source={
+                                report?.user?.avatarStyle && report?.user?.avatarSeed
+                                    ? { uri: `https://api.dicebear.com/9.x/${report.user.avatarStyle}/png?seed=${report.user.avatarSeed}` }
+                                    : require('../../assets/images/avatar_placeholder.jpg')
+                            }
+                        />
+                    </View>
+                    <View style={{ marginLeft: 8}}>
+                        <Text >{report.user?.username || 'Név nélkül'}</Text>
+                        <Text style={styles.date}>{new Date(report.createdAt).toLocaleString('hu-HU')}</Text>
+                    </View>
+                </View>
+                <Text style={styles.title}>{report.title}</Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                    <Text>Beküldő</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+
+
+                    </View>
+                </View>
+                <Divider />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                    <Text>Város</Text>
+                    <Text>{report.city}</Text>
+                </View>
+                <Divider />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                    <Text>Utca</Text>
+                    <Text>{report.address}</Text>
+                </View>
+                <Divider />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                    <Text>Kategória</Text>
+                    <Text style={styles.category}>{report.category.categoryName || 'Nincs kategória'}</Text>
+                </View>
+
+                <Divider />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingBottom: 30 }}>
+                    <Text>Státusz</Text>
+                    <Text>{report.status}</Text>
+                </View>
+                <Button
+                    style={styles.confirmButton}
+                    textColor="#6BAEA1"
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                >Megerősítem</Button>
+            </View>
+            <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 8, paddingHorizontal: -14 }}>
+            </View>
+            <View style={{ paddingHorizontal: 16 }}>
+                <Text style={styles.section}>Probléma leírása:</Text>
+                <Text style={styles.description}>{report.description}</Text>
             </View>
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-                <Avatar.Image
-                        size={32}
-                        source={
-                            report?.user?.avatarStyle && report?.user?.avatarSeed
-                                ? { uri: `https://api.dicebear.com/9.x/${report.user.avatarStyle}/png?seed=${report.user.avatarSeed}` }
-                                : require('../../assets/images/avatar_placeholder.jpg')
-                        }
-                    />
-                <Text style={{ marginLeft: 5 }}>{report.user?.username || 'Név nélkül'}</Text>
-            </View>
-            <View>
-                <Text style={styles.date}>{new Date(report.createdAt).toLocaleString('hu-HU')}</Text>
-            </View>
-            <Text style={styles.title}>{report.title}</Text>
+            <View style={styles.mapContainer}>
+                {report?.locationLat && report?.locationLng && (
+                    <MapView
+                        style={styles.map}
+                        initialRegion={{
+                            latitude: report.locationLat,
+                            longitude: report.locationLng,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                    >
+                        <Marker
+                            coordinate={{
+                                latitude: Number(report.locationLat),
+                                longitude: Number(report.locationLng),
+                            }}
+                            title="Beküldött pozíció"
+                            description={streetName}
+                        />
+                    </MapView>
+                )}
 
-            <Text style={styles.section}>Leírás:</Text>
-            <Text style={styles.description}>{report.description}</Text>
-            <Text style={styles.section}>Helyszín:</Text>
-            <Text>{report.city}, {report.zipCode}, {report.address}</Text>
-            <Text style={styles.section}>Kategória:</Text>
-            <Text style={styles.category}>{report.category.categoryName || 'Nincs kategória'}</Text>
+            </View>
+
+
 
         </ScrollView>
     )
@@ -85,7 +167,7 @@ export default ReportDetailScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        //padding: 16,
         backgroundColor: '#FAFAF8',
     },
     backButton: {
@@ -102,7 +184,8 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     header: {
-        paddingTop: 20,
+        paddingTop: 36,
+        paddingStart: 10,
         paddingBottom: 16,
         flexDirection: 'row',
         alignItems: 'center',
@@ -115,13 +198,13 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     title: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: 'bold',
     },
     date: {
         color: '#666',
         marginBottom: 12,
-        fontSize: 12,
+        fontSize: 10,
     },
     section: {
         marginTop: 16,
@@ -129,13 +212,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     description: {
-        fontSize: 14,
+        fontSize: 16,
         marginTop: 4,
+        marginBottom: 40
     },
     category: {
         fontSize: 14,
         marginTop: 4,
+    },
+    confirmButton: {
+        borderColor: "#6BAEA1",
+        borderWidth: 1.5,
+        borderRadius: 8,
+        marginTop: 16,
+        marginBottom: 16,
+        marginHorizontal: 60
+    },
+    mapContainer: {
+        height: 200,
+        borderRadius: 8,
+        overflow: 'hidden',
+        marginBottom: 32,
 
-
+    },
+    map: {
+        flex: 1,
     },
 })

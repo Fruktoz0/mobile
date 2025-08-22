@@ -29,10 +29,16 @@ export const fetchCurrentLocation = async (setLocation) => {
             alert('Helyhozzáférési engedély megtagadva');
             return;
         }
-        const currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation.coords);
+        const currentLocation = await Location.getCurrentPositionAsync({
+            timeout: 5000,
+        });
+        setLocation({
+            latitude: Number(currentLocation.coords.latitude),
+            longitude: Number(currentLocation.coords.longitude),
+        });
     } catch (error) {
         console.error('Hiba a hely lekérése során:', error);
+        alert("Nem sikerült a helyadatot lekérni. Ellenőrizd, hogy a GPS be van-e kapcsolva.")
     }
 };
 

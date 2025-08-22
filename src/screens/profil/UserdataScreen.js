@@ -45,7 +45,6 @@ function UserdataScreen() {
         // Felhasználói adatok mentése
         await updateUserProfile(userData.id, {
           username: formData.username,
-          email: formData.email,
           zipCode: formData.zipCode,
           city: formData.city,
           address: formData.address,
@@ -66,9 +65,6 @@ function UserdataScreen() {
       console.error("Mentés hiba:", err);
     }
   };
-
-
-
 
 
   const values = userData?.role === "user"
@@ -133,19 +129,11 @@ function UserdataScreen() {
                   style={[styles.input, { backgroundColor: '#FFFFFF' }]}
                   theme={{ colors: { primary: '#6db2a1' } }}
                 />
-                <TextInput
-                  label="Email"
-                  value={formData.email}
-                  onChangeText={(text) => setFormData({ ...formData, email: text })}
-                  mode="outlined"
-                  outlineColor="rgba(107, 174, 161, 0.3)"
-                  style={[styles.input, { backgroundColor: '#FFFFFF' }]}
-                  theme={{ colors: { primary: '#6db2a1' } }}
-                />
+           
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
                   <TextInput
                     label="Irányítószám"
-                    value={formData.zipCode}
+                    value={String(formData.zipCode)}
                     onChangeText={(text) => setFormData({ ...formData, zipCode: text })}
                     mode="outlined"
                     outlineColor="rgba(107, 174, 161, 0.3)"
@@ -244,7 +232,7 @@ function UserdataScreen() {
 
                 <Button
                   mode="contained"
-                  onPress={() => handleSaveInstitution()}
+                  onPress={() => handleSave()}
                   style={styles.submitButton}
                 >
                   Mentés

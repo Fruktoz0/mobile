@@ -57,7 +57,6 @@ export const addNews = async (newsData) => {
             });
         }
     
-
         const response = await axios.post(`${API_URL}/api/news/add`, formData, {
         headers: {
             "Authorization": `Bearer ${token}`,
