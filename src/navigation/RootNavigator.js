@@ -20,6 +20,7 @@ import UserdataScreen from '../screens/profil/UserdataScreen'
 import ChallengesScreen from '../screens/ChallengesScreen'
 import ChallengeDetailScreen from '../screens/ChallengeDetailScreen'
 import NewChallengeScreen from '../screens/NewChallangeScreen'
+import ChallengeSubmitScreen from '../screens/ChallangeSubmitScreen'
 
 
 
@@ -55,6 +56,7 @@ const RootNavigator = () => {
                 <Stack.Screen name="NewChallenge" component={NewChallengeScreen} />
                 <Stack.Screen name="Challenges" component={ChallengesScreen} />
                 <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} />
+                <Stack.Screen name="ChallengeSubmit" component={ChallengeSubmitScreen} />
                 {/* Profil oldalak */}  
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="Information" component={InformationScreen} />

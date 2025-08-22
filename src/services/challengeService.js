@@ -26,13 +26,14 @@ export const createChallenge = async (challengeData) => {
                 uri: challengeData.image,
                 name: fileName,
                 type: `image/${fileType}`,
-                
+
             });
         }
 
         const response = await axios.post(`${API_URL}/api/challenges/create`, formData, {
             headers: {
                 "Authorization": `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
             },
         });
 
@@ -46,10 +47,31 @@ export const createChallenge = async (challengeData) => {
 //Kihívások listázása
 export const getAllActiveChallenges = async () => {
     try {
-        const response = await axios.get(`${API_URL}/api/challenges/active`);
+        const token = await AsyncStorage.getItem("token");
+        const response = await axios.get(`${API_URL}/api/challenges/active`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
         return response.data;
     } catch (error) {
         console.error('Hiba a kihívások listázásakor:', error);
         throw error;
     }
 }
+
+//Kihívás feloldása
+export const unlockChallenge = async (challengeId) => {
+    try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await axios.post(`${API_URL}/api/challenges/${challengeId}/unlock`, {}, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Hiba a kihívás feloldásakor:", error.response?.data || error.message);
+        throw error;
+    }
+};

@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, RefreshControl } from 'react-native'
-import { useState, useEffect } from 'react'
-import { Plus } from 'lucide-react-native'
-import { getAllActiveChallenges } from '../services/challengeService'
+import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
+import { useState, useEffect,  } from 'react'
+import { Plus, Star, Lock } from 'lucide-react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { jwtDecode } from 'jwt-decode';
 import { useNavigation } from '@react-navigation/native'
-
+import { API_URL } from '../config/apiConfig'
+import { getAllActiveChallenges, unlockChallenge } from '../services/challengeService'
 
 
 const ChallengesScreen = () => {
@@ -42,6 +42,54 @@ const ChallengesScreen = () => {
     loadChallenges()
   }, [])
 
+  const handleChallengePress = (item) => {
+    if (!user) {
+      Alert.alert("Bejelentkezés szükséges", "Kérlek jelentkezz be a kihívás megnyitásához.");
+      return;
+    }
+
+    // ha nincs elég pont
+    if (user.points < item.costPoints) {
+      Alert.alert(
+        "Nincs elég pontod",
+        `Ehhez a kihíváshoz ${item.costPoints} pont szükséges. Neked jelenleg ${user.points} pontod van.`
+      );
+      return;
+    }
+
+    // ha még nincs unlock
+    if (!item.isUnlocked) {
+      Alert.alert(
+        "Megvásárlás megerősítése",
+        `Biztosan megveszed ezt a kihívást ${item.costPoints} pontért?`,
+        [
+          { text: "Mégse", style: "cancel" },
+          {
+            text: "Igen",
+            onPress: async () => {
+              try {
+                const result = await unlockChallenge(item.id);
+                Alert.alert("Siker!", "A kihívás feloldva.");
+                // frissítsük a user pontjait és a challenge állapotát
+                setUser({ ...user, points: result.currentPoints });
+                setChallenges((prev) =>
+                  prev.map((ch) => ch.id === item.id ? { ...ch, isUnlocked: true } : ch)
+                );
+                navigation.navigate('ChallengeDetail', { challenge: { ...item, isUnlocked: true } });
+              } catch (err) {
+                Alert.alert("Hiba", err.response?.data?.message || "Nem sikerült feloldani a kihívást.");
+              }
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // ha már unlockolta
+    navigation.navigate('ChallengeDetail', { challenge: item });
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -49,27 +97,56 @@ const ChallengesScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         refreshing={loadingChallenges}
         onRefresh={loadChallenges}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate('ChallengeDetail', { challenge: item })}
-          >
-            <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            <View style={styles.cardContent}>
-              <Text style={styles.category}>{item.category}</Text>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.description}>
-                {item.description.length > 120
-                  ? `${item.description.slice(0, 120)}…`
-                  : item.description}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          const locked = !item.isUnlocked;
 
+          return (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => handleChallengePress(item)}
+            >
+              <View style={styles.imageWrapper}>
+                <Image source={{ uri: `${API_URL}${item.image}` }} style={styles.image} />
+
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryText}>{item.category}</Text>
+                </View>
+
+                {locked && (
+                  <View style={styles.lockOverlay}>
+                    <Lock size={40} color="#fff" />
+                    <Text style={styles.lockText}>{item.costPoints}p</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.cardContent}>
+                <View style={styles.dateRow}>
+                  <Text style={styles.dateText}>
+                    Start: {new Date(item.startDate).toLocaleDateString()}
+                  </Text>
+                  <Text style={styles.dateText}>
+                    End: {new Date(item.endDate).toLocaleDateString()}
+                  </Text>
+                </View>
+
+                <Text style={styles.title}>{item.title}</Text>
+
+                <View style={styles.descRow}>
+                  <Text style={styles.description} numberOfLines={2}>
+                    {item.description}
+                  </Text>
+                  <View style={styles.rewardRow}>
+                    <Star size={16} color="#FFD700" />
+                    <Text style={styles.rewardText}>+{item.rewardPoints}p</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )
+        }}
       />
 
-      {/* Admin/Institution kihívás hozzáadása gomb */}
       {(user && (user.role === "admin" || user.role === "institution")) && (
         <TouchableOpacity
           style={styles.fab}
@@ -81,6 +158,7 @@ const ChallengesScreen = () => {
     </View>
   )
 }
+
 
 export default ChallengesScreen
 
@@ -96,33 +174,83 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 20,
     overflow: 'hidden',
-    elevation: 3,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
+    elevation: 3,
+  },
+  imageWrapper: {
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 160,
   },
-  cardContent: {
-    padding: 15,
+  categoryBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: '#6BAEA1',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  category: {
+  categoryText: {
+    color: '#fff',
     fontSize: 12,
-    color: '#6BAEA1',
-    marginBottom: 6,
     fontWeight: '600',
   },
-  title: {
-    fontSize: 18,
+  lockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 8,
+    marginTop: 6,
+  },
+  cardContent: {
+    padding: 12,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#888',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
     color: '#333',
+    textTransform: 'uppercase',
+  },
+  descRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   description: {
-    fontSize: 14,
+    flex: 1,
+    fontSize: 13,
     color: '#666',
+    marginRight: 8,
+  },
+  rewardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rewardText: {
+    marginLeft: 4,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#444',
   },
   fab: {
     position: "absolute",
@@ -134,8 +262,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4, // Android shadow
-    shadowColor: "#000", // iOS shadow
+    elevation: 4,
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
