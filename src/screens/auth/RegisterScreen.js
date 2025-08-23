@@ -1,9 +1,10 @@
 import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
-import { TextInput, Button, Text, Dialog, Provider, Portal } from 'react-native-paper';
+import { TextInput, Button, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react'
 import { Dimensions } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { register } from '../../services/authService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
