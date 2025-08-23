@@ -1,10 +1,8 @@
 import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, Dialog, Provider, Portal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Dimensions } from 'react-native';
-import axios from 'axios';
-import { API_URL } from '../../config/apiConfig';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -18,35 +16,20 @@ const RegisterScreen = () => {
   const navigation = useNavigation();
 
   const handleRegister = async () => {
-    if (!username || !email || !password || !confirmPassword) {
-      Alert.alert('Kérjük, töltse ki az összes mezőt.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert('A jelszavak nem egyeznek.');
-      return;
-    }
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
-        username,
-        email,
-        password
-      });
+      const response = await register(username, email, password, confirmPassword);
       if (response.status === 201) {
         Alert.alert('Sikeres regisztráció!', 'Most már be tudsz jelentkezni.', [
           { text: 'OK', onPress: () => navigation.navigate('Login') }
         ]);
-      } else {
-        Alert.alert('Hiba', response.data.message || 'Hiba történt.');
       }
 
-
     } catch (error) {
-      console.error('Registration error:', error);
-
-      Alert.alert('Hiba történt a regisztráció során. Kérjük, próbálja újra.');
+      console.error('Regisztrációs hiba:', error);
+      if (error.response) {
+        Alert.alert(error.response?.data?.message || 'Ismeretlen hiba történt.');
+      }
     }
-
   }
 
   return (
@@ -56,7 +39,7 @@ const RegisterScreen = () => {
       extraScrollHeight={20}
       enableOnAndroid={true}
       keyboardShouldPersistTaps="handled"
-      
+
     >
       <View style={styles.container}>
         <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />

@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { API_URL } from "../config/apiConfig";
 
 export const getToken = async () => {
   try {
@@ -21,4 +23,22 @@ export const getCurrentUser = async () => {
     console.error("User decode hiba:", err);
     return null;
   }
+};
+
+export const login = async (email, password) => {
+  const response = await axios.post(`${API_URL}/api/auth/login`, { email, password, });
+  if (response.status === 200) {
+    const token = response.data.token;
+    await AsyncStorage.setItem("token", token);
+  }
+  return response;
+}
+
+export const register = async (username, email, password, confirmPassword) => {
+  const response = await axios.post(`${API_URL}/api/auth/register`, { username, email, password, confirmPassword });
+  if (response.status === 201) {
+    const token = response.data.token;
+    await AsyncStorage.setItem("token", token);
+  }
+  return response;
 };

@@ -3,10 +3,7 @@ import { TextInput, Button, Text } from 'react-native-paper';
 import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '../../config/apiConfig';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { login } from '../../services/authService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -17,71 +14,59 @@ const LoginScreen = () => {
     const navigation = useNavigation();
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            alert('Kérjük, töltse ki az összes mezőt.');
-            return;
-        }
         try {
-            const response = await axios.post(`${API_URL}/api/auth/login`, {
-                email,
-                password
-            });
+            const response = await login(email, password);
             if (response.status === 200) {
-                const token = response.data.token;
-                await AsyncStorage.setItem('token', token);
-                navigation.replace('MainTabs')
-
-            } else {
-                Alert.alert('Hiba történt', 'Kérjük, ellenőrizze az adatait és próbálja újra.');
+                navigation.navigate('Home');
             }
-
         } catch (error) {
             console.error('Bejelentkezési hiba:', error);
-            alert('Hibás email vagy jelszó. Kérjük, próbálja újra.');
+            if (error.response) {
+                Alert.alert(error.response?.data?.message || 'Ismeretlen hiba történt.');
+            }
         }
     }
 
     return (
- 
-            <View style={styles.container}>
-                <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
-                <Text style={styles.title}>BEJELENTKEZÉS</Text>
+        <View style={styles.container}>
+            <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
+            <Text style={styles.title}>BEJELENTKEZÉS</Text>
 
-                <TextInput
-                    label="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
-                    style={styles.input}
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                />
-                <TextInput
-                    label="Jelszó"
-                    value={password}
-                    onChangeText={setPassword}
-                    mode="outlined"
-                    secureTextEntry
-                    style={styles.input}
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                />
+            <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                mode="outlined"
+                style={styles.input}
+                theme={{ colors: { primary: '#6db2a1' } }}
+            />
+            <TextInput
+                label="Jelszó"
+                value={password}
+                onChangeText={setPassword}
+                mode="outlined"
+                secureTextEntry
+                style={styles.input}
+                theme={{ colors: { primary: '#6db2a1' } }}
+            />
 
-                <Button
-                    mode="contained"
-                    onPress={handleLogin}
-                    style={styles.button}
-                >
-                    BEJELENTKEZÉS
-                </Button>
-                <View style={styles.divider} />
+            <Button
+                mode="contained"
+                onPress={handleLogin}
+                style={styles.button}
+            >
+                BEJELENTKEZÉS
+            </Button>
+            <View style={styles.divider} />
 
-                <TouchableOpacity style={styles.googleButton}>
-                    <Image source={require('../../../assets/images/google.svg')} style={styles.googleIcon} />
-                </TouchableOpacity>
+            <TouchableOpacity style={styles.googleButton}>
+                <Image source={require('../../../assets/images/google.svg')} style={styles.googleIcon} />
+            </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
+            </TouchableOpacity>
+        </View>
 
     )
 }
