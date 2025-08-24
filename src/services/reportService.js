@@ -86,7 +86,7 @@ export const sendReport = async ({ title, description, categoryId, address, city
 };
 
 //Validáció 
-export const isFormValid = ({ title, description, zipCode, address, city, categoryId, images }) => {
+export const isFormValid = ({ title, description, zipCode, address, city, categoryId, images, location }) => {
     return (
         title.trim() !== '' &&
         description.trim() !== '' &&
@@ -94,7 +94,9 @@ export const isFormValid = ({ title, description, zipCode, address, city, catego
         address.trim() !== '' &&
         city.trim() !== '' &&
         categoryId !== '' &&
-        images.length > 0
+        images.length > 0 &&
+        location?.latitude &&
+        location?.longitude
     );
 };
 

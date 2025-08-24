@@ -17,7 +17,7 @@ const LoginScreen = () => {
         try {
             const response = await login(email, password);
             if (response.status === 200) {
-                navigation.navigate('Home');
+                navigation.replace('MainTabs')
             }
         } catch (error) {
             console.error('Bejelentkezési hiba:', error);

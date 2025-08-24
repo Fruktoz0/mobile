@@ -20,13 +20,13 @@ const RegisterScreen = () => {
     try {
       const response = await register(username, email, password, confirmPassword);
       if (response.status === 201) {
-        Alert.alert('Sikeres regisztráció!', 'Most már be tudsz jelentkezni.', [
+        Alert.alert('Sikeres regisztráció!', response.data.message, [
           { text: 'OK', onPress: () => navigation.navigate('Login') }
         ]);
       }
 
     } catch (error) {
-      console.error('Regisztrációs hiba:', error);
+      console.error('Regisztrációs hiba:', error.message);
       if (error.response) {
         Alert.alert(error.response?.data?.message || 'Ismeretlen hiba történt.');
       }

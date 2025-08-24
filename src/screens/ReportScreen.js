@@ -71,7 +71,7 @@ const ReportScreen = () => {
     }
   };
 
-  const formValid = isFormValid({ title, description, zipCode, address, city, categoryId, images });
+  const formValid = isFormValid({ title, description, zipCode, address, city, categoryId, images, location });
 
   return (
     <>

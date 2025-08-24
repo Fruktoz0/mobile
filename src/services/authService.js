@@ -36,9 +36,5 @@ export const login = async (email, password) => {
 
 export const register = async (username, email, password, confirmPassword) => {
   const response = await axios.post(`${API_URL}/api/auth/register`, { username, email, password, confirmPassword });
-  if (response.status === 201) {
-    const token = response.data.token;
-    await AsyncStorage.setItem("token", token);
-  }
   return response;
 };
