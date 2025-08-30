@@ -12,13 +12,12 @@ import { jwtDecode } from 'jwt-decode';
 
 
 
-
 const ReportsScreen = () => {
   const navigation = useNavigation()
   const [reports, setReports] = useState([])
   const [searchText, setSearchText] = useState('');
   const [userId, setUserId] = useState(null);
-  const [refreshing, setRefreshing] = useState(false); // ← pull to refresh állapot
+  const [refreshing, setRefreshing] = useState(false); // pull to refresh állapot
 
 
 
@@ -79,7 +78,6 @@ const ReportsScreen = () => {
   };
 
 
-
   const handleVote = async (reportId, voteType,) => {
     try {
 
@@ -107,7 +105,6 @@ const ReportsScreen = () => {
     return reportVotes.find(vote => vote.userId === userId)?.voteType;
 
   }
-
 
   return (
     <View style={styles.container}>

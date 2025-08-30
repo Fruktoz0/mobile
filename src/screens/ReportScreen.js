@@ -11,11 +11,13 @@ import {
   sendReport,
   isFormValid
 } from '../services/reportService';
+import { useNavigation } from '@react-navigation/native'
 
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const ReportScreen = () => {
+  const navigation = useNavigation();
 
   const [images, setImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -54,7 +56,14 @@ const ReportScreen = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await sendReport({ title, description, categoryId, address, city, zipCode, location, images });
+      const res = await sendReport({ title, description, categoryId, address, city, zipCode, location, images });
+
+      //Ha kaptunk új badget átugrik a success képernyőre
+      if (res.newBadges && res.newBadges.length > 0) {
+        navigation.navigate('ReportSuccess', { newBadges: res.newBadges })
+      } else {
+        //Ha nincs új badge, kiürítjük a formot
+      }
       setTitle('');
       setDescription('');
       setCategoryId('');
