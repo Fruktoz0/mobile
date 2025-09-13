@@ -14,6 +14,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "781998126080-fl9t7ajsg0uiknn4adu3q117ompdvevt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fruktoz.tisztavaros",
+            "certificate_hash": "7d36fb74e9e0801008e9c669493f5e8b305a3f7c"
+          }
+        },
+        {
+          "client_id": "781998126080-mo0pevjmr4igibusskgk74oh4l9op4q0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fruktoz.tisztavaros",
+            "certificate_hash": "fd691747791a4bf0ad4a00d719370012eab7e3a1"
+          }
+        },
+        {
+          "client_id": "781998126080-nae51dmms2e97lsacejrk7lg7mhfu4tg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fruktoz.tisztavaros",
+            "certificate_hash": "2e73eaff70ba28db7823b1f3d6e603f0ab2ce16d"
+          }
+        },
+        {
           "client_id": "781998126080-d1iufibc9l0th9vhhbhr1inap98fsdr6.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -11,10 +11,11 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification/notification_icon.png",
+          "icon": "./assets/images/notification-icon.png",
           "color": "#ffffff",
           "defaultChannel": "default",
-          "enableBackgroundRemoteNotifications": true
+          "enableBackgroundRemoteNotifications": true,
+          "useNextNotificationsApi": true
         }
       ]
     ],
@@ -41,7 +42,8 @@
         "INTERNET",
         "READ_EXTERNAL_STORAGE",
         "READ_MEDIA_IMAGES",
-        "RECEIVE_BOOT_COMPLETED"
+        "RECEIVE_BOOT_COMPLETED",
+        "POST_NOTIFICATIONS"
       ]
     },
     "updates": {

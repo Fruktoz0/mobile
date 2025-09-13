@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import { registerForPushNotificationsAsync } from "../services/notificationService";
-import * as Notifications from 'expo-notifications';
 
 
 const HomeScreen = () => {
@@ -20,9 +19,11 @@ const HomeScreen = () => {
   const [user, setUser] = useState(null);
 
 
+
   //Felhasználó lekérése
   const loadUser = async () => {
     const token = await AsyncStorage.getItem('token');
+    console.log("Token a HomeScreen-ben:", token);
     if (token) {
       const decoded = jwtDecode(token);
       setUser(decoded);
@@ -60,30 +61,14 @@ const HomeScreen = () => {
     loadInstitutions();
   }, []);
 
-  useEffect(() => {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "Default",
-      importance: Notifications.AndroidImportance.MAX,
-    });
-  }, []);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationReceivedListener(notification => {
-      console.log("📩 Notification received:", notification);
-    });
-    return () => sub.remove();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      registerForPushNotificationsAsync().then(token => {
-        console.log("Push token:", token)
-        // Itt tudod meghívni a backend updatePushToken endpointot
-      });
+    if (user && user.id) {
+      registerForPushNotificationsAsync();
     }
   }, [user]);
 
-
+  // Szűrés az aktív intézmény alapján
   const filtered = useMemo(() => {
     if (activeInst === "all") return news;
     return news.filter((r) => r.institutionId === activeInst);

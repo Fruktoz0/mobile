@@ -1,35 +1,38 @@
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
+import { API_URL } from '../config/apiConfig';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
 
+//Push értesítések regisztrációja
 export async function registerForPushNotificationsAsync() {
     try {
-        if (!Device.isDevice) {
-            console.log('Push értesítések csak valódi eszközön működnek!');
-            alert('Push értesítések csak valódi eszközön működnek!');
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        if (!enabled) {
+            console.log('Push értesítések engedélyezése megtagadva');
             return;
         }
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
+        //Token lekérése firebaseből
+        const pushToken = await messaging().getToken();
+        console.log("FCM Push token:", pushToken);
 
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+            console.log("Nincs bejelentkezve a felhasználó, nem lehet elküldeni a push tokent a szervernek.");
+            return pushToken;
         }
-
-        if (finalStatus !== 'granted') {
-            console.log("❌ Push engedély nem lett megadva.");
-            alert('Push értesítések engedélyezése szükséges!');
-            return;
-        }
-
-        const tokenData = await Notifications.getExpoPushTokenAsync({
-            projectId: "a6a9bdd2-1326-4ec2-8aa4-2a922b653826"
-        });
-
-        console.log("Push token:", tokenData.data);
-        return tokenData.data;
-    }catch (error) {
+        //Token elküldése a szervernek
+        await axios.post(`${API_URL}/users/registerPushToken`, { pushToken }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log("Push token sikeresen elküldve a szervernek.");
+        return pushToken;
+    } catch (error) {
         console.log("Push token lekérése sikertelen:", error);
     }
-   
 }
+
