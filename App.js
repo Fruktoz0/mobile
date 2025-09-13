@@ -6,9 +6,17 @@ import LoginScreen from './src/screens/auth/LoginScreen';
 import RootNavigator from './src/navigation/RootNavigator';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { enableScreens } from 'react-native-screens';
+import * as Notifications from "expo-notifications";
 
 enableScreens();
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function App() {
 

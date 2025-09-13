@@ -5,7 +5,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { Avatar, Button, Divider } from 'react-native-paper'
 import Carousel, { Pagination } from 'react-native-reanimated-carousel';
-import MapView, { Marker } from 'react-native-maps';
+import { MapLibreGL } from '../config/mapConfig';
+
 import * as Location from 'expo-location';
 import { useState, useEffect } from 'react'
 
@@ -84,7 +85,7 @@ const ReportDetailScreen = ({ route }) => {
                             }
                         />
                     </View>
-                    <View style={{ marginLeft: 8}}>
+                    <View style={{ marginLeft: 8 }}>
                         <Text >{report.user?.username || 'Név nélkül'}</Text>
                         <Text style={styles.date}>{new Date(report.createdAt).toLocaleString('hu-HU')}</Text>
                     </View>
@@ -134,24 +135,28 @@ const ReportDetailScreen = ({ route }) => {
 
             <View style={styles.mapContainer}>
                 {report?.locationLat && report?.locationLng && (
-                    <MapView
+                    <MapLibreGL.MapView
                         style={styles.map}
-                        initialRegion={{
-                            latitude: report.locationLat,
-                            longitude: report.locationLng,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
-                        }}
+                        styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                        logoEnabled={false}
+                        compassEnabled={false}
                     >
-                        <Marker
-                            coordinate={{
-                                latitude: Number(report.locationLat),
-                                longitude: Number(report.locationLng),
-                            }}
-                            title="Beküldött pozíció"
-                            description={streetName}
+                        <MapLibreGL.Camera
+                            zoomLevel={16}
+                            centerCoordinate={[
+                                Number(report.locationLng),
+                                Number(report.locationLat)
+                            ]}
                         />
-                    </MapView>
+                        <MapLibreGL.PointAnnotation
+                            id="reportLocation"
+                            coordinate={[
+                                Number(report.locationLng),
+                                Number(report.locationLat),
+                            ]}
+                        />
+
+                    </MapLibreGL.MapView>
                 )}
 
             </View>

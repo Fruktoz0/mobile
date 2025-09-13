@@ -7,6 +7,17 @@
     "icon": "./assets/images/tisztavaros_logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification/notification_icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
+    ],
     "splash": {
       "image": "./assets/images/tisztavaros_logo.png",
       "resizeMode": "contain",
@@ -22,12 +33,15 @@
       "edgeToEdgeEnabled": true,
       "package": "com.fruktoz.tisztavaros",
       "versionCode": 7,
+      "googleServicesFile": "./android/app/google-services.json",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "CAMERA",
+        "INTERNET",
         "READ_EXTERNAL_STORAGE",
-        "READ_MEDIA_IMAGES"
+        "READ_MEDIA_IMAGES",
+        "RECEIVE_BOOT_COMPLETED"
       ]
     },
     "updates": {

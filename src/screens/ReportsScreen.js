@@ -3,7 +3,7 @@ import { Card, Badge, IconButton, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { Image } from 'react-native'
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { API_URL } from '../config/apiConfig'
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';

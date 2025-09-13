@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "781998126080",
+    "project_id": "tisztavaros-70b1e",
+    "storage_bucket": "tisztavaros-70b1e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:781998126080:android:611f8b6813e85a2f4394e5",
+        "android_client_info": {
+          "package_name": "com.fruktoz.tisztavaros"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "781998126080-d1iufibc9l0th9vhhbhr1inap98fsdr6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDswGrbAQQ4p-6_235IxA57VErRE1n2YRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "781998126080-d1iufibc9l0th9vhhbhr1inap98fsdr6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
