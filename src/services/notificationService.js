@@ -2,10 +2,16 @@ import { API_URL } from '../config/apiConfig';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 //Push értesítések regisztrációja
 export async function registerForPushNotificationsAsync() {
     try {
+        if (Platform.OS === 'android') {
+            await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            );
+        }
         const authStatus = await messaging().requestPermission();
         const enabled =
             authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -24,7 +30,7 @@ export async function registerForPushNotificationsAsync() {
             return pushToken;
         }
         //Token elküldése a szervernek
-        await axios.post(`${API_URL}/users/registerPushToken`, { pushToken }, {
+        await axios.post(`${API_URL}/api/users/registerPushToken`, { pushToken }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import { registerForPushNotificationsAsync } from "../services/notificationService";
+import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
 
 
 const HomeScreen = () => {
@@ -62,11 +64,32 @@ const HomeScreen = () => {
   }, []);
 
 
+  // Felhasználó változására regisztráció a push értesítésekre
   useEffect(() => {
     if (user && user.id) {
       registerForPushNotificationsAsync();
     }
   }, [user]);
+
+  // Értesítések kezelése
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground push:', remoteMessage);
+
+      if (!remoteMessage.notification) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: remoteMessage.notification?.title,
+            body: remoteMessage.notification?.body,
+            data: remoteMessage.data,
+          },
+          trigger: null, // azonnal megjelenik
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Szűrés az aktív intézmény alapján
   const filtered = useMemo(() => {

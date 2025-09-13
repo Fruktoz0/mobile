@@ -1,4 +1,10 @@
 import { registerRootComponent } from 'expo';
+import messaging from '@react-native-firebase/messaging';
+
+// Háttérben érkező üzenetek kezelése
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Háttér üzenet:', remoteMessage);
+});
 
 import App from './App';
 
