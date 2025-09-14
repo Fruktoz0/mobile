@@ -7,7 +7,6 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { enableScreens } from 'react-native-screens';
 import * as Notifications from 'expo-notifications';
-import usePushNotifications from './src/hooks/usePushNotifications';
 
 
 enableScreens();
@@ -22,8 +21,7 @@ export default function App() {
     }),
   });
 
-  // Egyéni hook a push értesítések kezelésére
-  usePushNotifications();
+
 
   function Root() {
     const { isLoggedIn } = useAuth();

@@ -22,15 +22,17 @@ import ChallengeDetailScreen from '../screens/ChallengeDetailScreen'
 import NewChallengeScreen from '../screens/NewChallangeScreen'
 import ChallengeSubmitScreen from '../screens/ChallangeSubmitScreen'
 import ReportSuccessScreen from '../screens/ReportSuccessScreen'
-import MenuScreen from '../screens/MenuScreen'
+import usePushNotifications from '../hooks/usePushNotifications'
 
 
 
 const Stack = createStackNavigator()
 
 const RootNavigator = () => {
+
     return (
         <NavigationContainer>
+            <PushHandler />
             <Stack.Navigator
                 initialRouteName="Login"
                 screenOptions={{ headerShown: false }}
@@ -70,8 +72,14 @@ const RootNavigator = () => {
 
             </Stack.Navigator>
         </NavigationContainer>
-
     )
+}
+
+const PushHandler = () => {
+    // Egyéni hook a push értesítések kezelésére
+    usePushNotifications();
+
+    return null;
 }
 
 export default RootNavigator

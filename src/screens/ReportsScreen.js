@@ -132,7 +132,7 @@ const ReportsScreen = () => {
           return (
             <Card
               style={styles.card}
-              onPress={() => navigation.navigate('ReportDetail', { report: item })}
+              onPress={() => navigation.navigate('ReportDetail', { reportId: item.id })}
             >
               <View style={styles.cardContent}>
                 <Image

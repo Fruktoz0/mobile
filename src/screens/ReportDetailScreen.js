@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { API_URL } from '../config/apiConfig'
 import { Image, Dimensions } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -6,35 +6,45 @@ import { useNavigation } from '@react-navigation/native'
 import { Avatar, Button, Divider } from 'react-native-paper'
 import Carousel, { Pagination } from 'react-native-reanimated-carousel';
 import { MapLibreGL } from '../config/mapConfig';
-
+import { getReportById } from '../services/reportService'
 import * as Location from 'expo-location';
 import { useState, useEffect } from 'react'
 
 const ReportDetailScreen = ({ route }) => {
-    const { report } = route.params;
+    const navigation = useNavigation();
 
-    const navigation = useNavigation()
+    const { reportId } = route.params;
+    const [report, setReport] = useState(null)
     const { width } = Dimensions.get('window');
-    const [streetName, setStreetName] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [loading, setLoading] = useState(true)
+
+    const statusMap = {
+        open: { label: "Nyitott", color: "#6B7280" },        
+        in_progress: { label: "Folyamatban", color: "#EAB308" }, 
+        forwarded: { label: "Továbbítva", color: "#3B82F6" },
+        resolved: { label: "Megoldva", color: "#22C55E" },   
+        reopened: { label: "Újranyitva", color: "#F97316" }, 
+        rejected: { label: "Elutasítva", color: "#EF4444" }  
+    };
 
     useEffect(() => {
-        const fetchAddress = async () => {
-            if (report?.locationLat && report?.locationLng) {
-                try {
-                    const [address] = await Location.reverseGeocodeAsync({
-                        latitude: Number(report.locationLat),
-                        longitude: Number(report.locationLng),
-                    });
-                    setStreetName(address?.street || "Ismeretlen utca");
-                } catch (error) {
-                    console.error("Geocoding hiba:", error);
-                }
+        const loadReport = async () => {
+            try {
+                const data = await getReportById(reportId);
+                setReport(data);
+            } catch (error) {
+                console.error("Hiba a bejelentés betöltése során:", error);
+            } finally {
+                setLoading(false)
             }
         };
 
-        fetchAddress();
-    }, [report]);
+        loadReport();
+    }, [reportId]);
+
+    if (loading) return <ActivityIndicator size="large" color="#009688" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
+    if (!report) return <Text>Nem található bejelentés</Text>
 
     return (
         <ScrollView style={styles.container}>
@@ -48,7 +58,7 @@ const ReportDetailScreen = ({ route }) => {
                 <Carousel
                     width={width}
                     height={250}
-                    data={report.reportImages}
+                    data={report.reportImages || []}
                     onSnapToItem={(index) => setActiveIndex(index)}
                     renderItem={({ item }) => (
                         <Image
@@ -59,7 +69,7 @@ const ReportDetailScreen = ({ route }) => {
                 />
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
-                    {report.reportImages.map((_, i) => (
+                    {report?.reportImages?.map((_, i) => (
                         <View
                             key={i}
                             style={{
@@ -118,7 +128,7 @@ const ReportDetailScreen = ({ route }) => {
                 <Divider />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingBottom: 30 }}>
                     <Text>Státusz</Text>
-                    <Text>{report.status}</Text>
+                    <Text style={{ color: statusMap[report.status]?.color }}>{statusMap[report.status]?.label || report.status}</Text>
                 </View>
                 <Button
                     style={styles.confirmButton}

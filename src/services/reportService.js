@@ -143,3 +143,14 @@ export const updateReportStatus = async (reportId, currentStatus, newStatus, com
     return response.data;
 };
 
+export const getReportById = async (reportId) => {
+
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/api/reports/${reportId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return response.data;
+};

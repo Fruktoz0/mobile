@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
 
 //Push értesítések regisztrációja
 export async function registerForPushNotificationsAsync() {
@@ -60,7 +59,7 @@ export async function setupNotificationChannel() {
 //Értesítésre kattintás navigációs térkép
 //Ezt használja a usePushNotifications hook
 export const targetMap = (navigation) => ({
-    report: (data) => navigation.navigate("ReportDetails", { reportId: data.id }),
+    report: (data) => navigation.navigate("ReportDetail", { reportId: data.reportId }),
     news: (data) => navigation.navigate("NewsDetails", { id: data.id }),
     badge: () => navigation.navigate("Profile"),
 })
