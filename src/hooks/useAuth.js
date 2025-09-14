@@ -1,5 +1,4 @@
-import {  createContext, useContext, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { createContext, useContext, useState } from 'react'
 import { authService } from '../services/authService'
 
 
@@ -25,8 +24,5 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     )
 }
-
-
-const styles = StyleSheet.create({})
 
 export const useAuth = () => useContext(AuthContext);

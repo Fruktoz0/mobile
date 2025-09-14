@@ -6,9 +6,8 @@ import LoginScreen from './src/screens/auth/LoginScreen';
 import RootNavigator from './src/navigation/RootNavigator';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { enableScreens } from 'react-native-screens';
-import { useEffect } from 'react';
-import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
+import usePushNotifications from './src/hooks/usePushNotifications';
 
 
 enableScreens();
@@ -23,21 +22,8 @@ export default function App() {
     }),
   });
 
-  // Értesítések kezelése
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground push:', remoteMessage);
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: remoteMessage.notification?.title,
-          body: remoteMessage.notification?.body,
-          data: remoteMessage.data,
-        },
-        trigger: null,
-      });
-    });
-    return unsubscribe;
-  }, []);
+  // Egyéni hook a push értesítések kezelésére
+  usePushNotifications();
 
   function Root() {
     const { isLoggedIn } = useAuth();
