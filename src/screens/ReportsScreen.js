@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native'
-import { Card, Badge, IconButton, Searchbar } from 'react-native-paper'
+import { Card, IconButton, Searchbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { API_URL } from '../config/apiConfig'
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
-
+import { fetchAllReports } from '../services/reportService'
 
 
 const ReportsScreen = () => {
@@ -19,28 +19,25 @@ const ReportsScreen = () => {
   const [userId, setUserId] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // pull to refresh állapot
 
-
-
-  const fetchAllReports = async () => {
+  const loadReports = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/reports/getAllReports`)
-      const reports = response.data;
-      setReports(reports);
+      const data = await fetchAllReports();
+      setReports(data);
     } catch (error) {
-      console.error('Hiba a reportok lekérdezésében', error);
+      console.error("Hiba a bejelentések betöltésekor:", error);
     }
-  };
+  }
 
   //Ha képernyőre fokusz kerül frissít
   useFocusEffect(
     useCallback(() => {
-      fetchAllReports();
+      loadReports();
     }, [])
   )
   //Pull-to-refresh lehúzással
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchAllReports();
+    await loadReports();
     setRefreshing(false);
   };
 
@@ -60,7 +57,6 @@ const ReportsScreen = () => {
       }
     };
     loadUserIdFromToken();
-    console.log('User ID:', userId);
   }, []);
 
 
@@ -89,7 +85,7 @@ const ReportsScreen = () => {
 
       });
       // Frissíti a lista adatait
-      fetchAllReports(); // vagy csak azt az egy reportot
+      await loadReports(); // vagy csak azt az egy reportot
     } catch (err) {
       console.error('Szavazási hiba:', err.response?.data || err.message);
     }
@@ -273,8 +269,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
-  vote: {
-
-  }
 
 })

@@ -4,7 +4,7 @@ import { Image } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react';
-import { getNewsById } from '../services/homeService';
+import { getNewsById, } from '../services/homeService';
 
 
 const NewsDetailsScreen = ({ route }) => {
@@ -17,6 +17,7 @@ const NewsDetailsScreen = ({ route }) => {
         const fetchNews = async () => {
             try {
                 const newsData = await getNewsById(id);
+
                 setNews(newsData);
             } catch (error) {
                 console.error('Hiba történt a hír lekérdezése során:', error);
@@ -26,7 +27,7 @@ const NewsDetailsScreen = ({ route }) => {
         fetchNews();
     }, [id]);
 
-    if(!news) return <Text>Betöltés...</Text>;
+    if (!news) return <Text>Betöltés...</Text>;
 
     return (
         <ScrollView style={styles.container}>
@@ -36,27 +37,32 @@ const NewsDetailsScreen = ({ route }) => {
                     <Text style={styles.backText}>Vissza</Text>
                 </TouchableOpacity>
             </View>
-            {news.imageUrl ? (
-                <Image
-                    source={{ uri: `${API_URL}/${news.imageUrl}` }}
-                    style={styles.image}
-                />
-            ) : news.institution?.logoUrl ? (
-                <Image
-                    source={{ uri: `${API_URL}${news.institution.logoUrl}` }}
-                    style={styles.image}
-                />
-            ) : (
-                <View style={styles.monogramContainer}>
-                    <Text style={styles.monogramText}>
-                        {news.institution?.name
-                            ?.split(" ")
-                            .slice(0, 2)
-                            .join(" ")
-                             || "?"}
-                    </Text>
-                </View>
-            )}
+            <View style={styles.imageWrapper}>
+
+                {news.imageUrl ? (
+                    <Image
+                        source={{ uri: `${API_URL}/${news.imageUrl}` }}
+                        style={styles.image}
+                        resizeMode='cover'
+                    />
+                ) : news.institution?.logoUrl ? (
+                    <Image
+                        source={{ uri: news.institution.logoUrl }}
+                        style={[styles.image]}
+                        resizeMode='contain'
+                    />
+                ) : (
+                    <View style={styles.monogramContainer}>
+                        <Text style={styles.monogramText}>
+                            {news.institution?.name
+                                ?.split(" ")
+                                .slice(0, 2)
+                                .join(" ")
+                                || "?"}
+                        </Text>
+                    </View>
+                )}
+            </View>
             <Text style={styles.title}>{news.title}</Text>
             <Text style={styles.date}>Létrehozva: {new Date(news.createdAt).toLocaleString('hu-HU')}</Text>
             <Text style={styles.section}>Leírás:</Text>
@@ -112,18 +118,36 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     monogramContainer: {
-        width: '100%',
+        width: "100%",
         height: 200,
-        borderRadius: 8,
-        marginBottom: 16,
-        backgroundColor: '#009688',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#009688",
     },
     monogramText: {
         fontSize: 48,
         fontWeight: 'bold',
         color: 'white',
+    },
+
+    imageWrapper: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        marginBottom: 16,
+        overflow: "hidden",
+        // Shadow iOS
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        // Shadow Android
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#eee",
+    },
+    image: {
+        width: "100%",
+        height: 200,
     },
 
 

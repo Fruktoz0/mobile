@@ -1,55 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, ScrollView } from 'react-native';
-import { Card, Title, Paragraph, Button, Menu, } from 'react-native-paper';
+import { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl, Image, TextInput } from 'react-native';
+import { Card, IconButton, Searchbar, Menu } from 'react-native-paper';
 import { fetchAssignedReports, updateReportStatus } from '../../services/reportService';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native';
+import { API_URL } from '../../config/apiConfig';
 
-const statusLabels = {
-    open: 'Függőben',
-    in_progress: 'Folyamatban',
-    rejected: 'Elutasítva',
-    resolved: 'Megoldva',
+
+const statusMap = {
+    open: { label: "Nyitott", color: "#6B7280" },
+    accepted: { label: "Elfogadva", color: "#1976D2" },
+    in_progress: { label: "Folyamatban", color: "#8E24AA" },
+    forwarded: { label: "Továbbítva", color: "#64B5F6" },
+    resolved: { label: "Megoldva", color: "#388E3C" },
+    reopened: { label: "Újranyitva", color: "#F57C00" },
+    rejected: { label: "Elutasítva", color: "#D32F2f" }
 };
 
-// Helper – dátumformázás
-const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return date.toLocaleString('hu-HU', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
 
 const InstitutionReportsScreen = () => {
     const navigation = useNavigation()
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [menuVisible, setMenuVisible] = useState(null); // index-alapú nyitott dropdown
+    const [searchText, setSearchText] = useState('')
+    const [refreshing, setRefreshing] = useState(false); // pull to refresh állapot
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState(null);
+
 
     const fetchReports = async () => {
         try {
             const data = await fetchAssignedReports();
             setReports(data);
         } catch (error) {
-            console.error('Hiba a jelentések lekérdezésekor:', error);
+            console.error(error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleStatusChange = async (reportId, currentStatus, newStatus) => {
-        if (newStatus === currentStatus) return;
-
-        try {
-            await updateReportStatus(reportId, currentStatus, newStatus);
-            fetchReports(); // újratöltés
-        } catch (error) {
-            console.error('Hiba státuszváltáskor:', error);
-            Alert.alert('Hiba', 'Nem sikerült módosítani a státuszt.');
         }
     };
 
@@ -57,87 +44,195 @@ const InstitutionReportsScreen = () => {
         fetchReports();
     }, []);
 
+
+    //pull to refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchReportsReports();
+        setRefreshing(false);
+    };
+
+    const getDistrictFromZip = (city, zipCode) => {
+        if (city !== 'Budapest' || typeof zipCode !== 'string' || zipCode.length !== 4) {
+            return city;
+        }
+        const districtNum = parseInt(zipCode.slice(1, 3), 10);
+
+        if (isNaN(districtNum) || districtNum < 1 || districtNum > 23) {
+            return city;
+        }
+        return `${districtNum}. kerület`;
+    };
+
+
     if (loading) {
         return <ActivityIndicator style={{ marginTop: 30 }} size="large" color="#6BAEA1" />;
     }
 
-    const renderReport = ({ item, index }) => (
-
-        <Card style={styles.card} key={item.id}>
-            <Card.Content>
-                <Title>{item.title}</Title>
-                <Paragraph>{item.description}</Paragraph>
-                <Text style={styles.label}>Bejelentő: {item.user?.username || 'Ismeretlen'}</Text>
-                <Text style={styles.label}>Kategória: {item.category?.categoryName || '-'}</Text>
-                <Text style={styles.label}>Aktuális státusz: {statusLabels[item.status]}</Text>
-            </Card.Content>
-
-            {/* Státusz dropdown */}
-            <Card.Actions>
-                <Menu
-                    visible={menuVisible === index}
-                    onDismiss={() => setMenuVisible(null)}
-                    anchor={
-                        <Button onPress={() => setMenuVisible(index)}>
-                            Státusz módosítása
-                        </Button>
-                    }
-                >
-                    {Object.keys(statusLabels).map(statusKey => (
-                        <Menu.Item
-                            key={statusKey}
-                            onPress={() => {
-                                handleStatusChange(item.id, item.status, statusKey);
-                                setMenuVisible(null);
-                            }}
-                            title={statusLabels[statusKey]}
-                        />
-                    ))}
-                </Menu>
-            </Card.Actions>
-
-            {/* Státusztörténet */}
-            {item.statusHistories?.length > 0 && (
-                <View style={styles.historyContainer}>
-                    <Text style={styles.historyTitle}>Státusztörténet:</Text>
-                    {item.statusHistories
-                        .sort((a, b) => new Date(b.changedAt) - new Date(a.changedAt))
-                        .map((history) => (
-                            <View key={history.id} style={styles.historyItem}>
-                                <Text style={styles.historyText}>
-                                    [{formatDate(history.changedAt)}] {statusLabels[history.statusId] || history.statusId}
-                                    {' '}– {history.setByUser?.username || 'Ismeretlen'}
-                                    {history.comment ? ` – megjegyzés: "${history.comment}"` : ''}
-                                </Text>
-                            </View>
-                        ))}
-                </View>
-            )}
-        </Card>
-
-
-
-    );
-
     return (
-        
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <View>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
+                        <Text style={styles.backText}>Bejelentések</Text>
+                    </TouchableOpacity>
+                </View>
+
+
+                {/* Kereső */}
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: "#fff",
+                    borderRadius: 8,
+                    height: 40,
+                    paddingHorizontal: 10,
+                }}>
+                    <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+                    <TextInput
+                        style={{
+                            flex: 1,
+                            fontSize: 14,
+                            marginLeft: 8,
+                            textAlignVertical: "center",
+                        }}
+                        placeholder="Keresés..."
+                        placeholderTextColor="#aaa"
+                        value={searchText}
+                        onChangeText={setSearchText}
+                    />
+                    <TouchableOpacity>
+                        <Menu
+                            visible={menuVisible}
+                            onDismiss={() => setMenuVisible(false)}
+                            anchor={
+                                <IconButton
+                                    icon="tune"
+                                    size={22}
+                                    onPress={() => setMenuVisible(true)}
+                                />
+                            }
+                            contentStyle={{ backgroundColor: '#FFFFFf', elevation: 2, borderRadius: 8, shadowColor: "transparent", }}
+                        >
+                            <Menu.Item
+                                onPress={() => {
+                                    setSelectedStatus(null);
+                                    setMenuVisible(false);
+                                }}
+                                title="Összes"
+                                titleStyle={{ fontSize: 14 }}
+                                leadingIcon={selectedStatus === null
+                                    ? (props) => (
+                                        <MaterialCommunityIcons
+                                            name="check"
+                                            size={18}
+                                            color="black"
+                                        />
+                                    )
+                                    : undefined
+                                }
+                            />
+                            {Object.keys(statusMap).map(status => (
+                                <Menu.Item
+                                    key={status}
+                                    onPress={() => {
+                                        setSelectedStatus(status);
+                                        setMenuVisible(false);
+                                    }}
+                                    title={statusMap[status].label}
+                                    titleStyle={{
+                                        fontSize: 14,
+                                        color: statusMap[status].color,
+                                    }}
+                                    leadingIcon={selectedStatus === status
+                                        ? (props) => (
+                                            <MaterialCommunityIcons
+                                                name="check"
+                                                size={18}
+                                                color="black"
+                                            />
+                                        )
+                                        : undefined
+                                    }
+                                />
+                            ))}
+                        </Menu>
+                    </TouchableOpacity>
+
+                </View>
+            </View>
 
 
             <FlatList
-                data={reports}
-                keyExtractor={(item) => item.id}
-                renderItem={renderReport}
-                style={styles.container}
-                contentContainerStyle={styles.list}
-                ListHeaderComponent={
-                    <View style={styles.header}>
-                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                            <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
-                            <Text style={styles.backText}>Intézményem bejelentései</Text>
-                        </TouchableOpacity>
-                    </View>
+                style={styles.listContent}
+                data={reports.filter(report =>
+                    (!selectedStatus || report.status === setSelectedStatus) &&
+                    (
+                        report.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                        report.description.toLowerCase().includes(searchText.toLowerCase())
+                    )
+
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => {
+
+                    return (
+                        <Card
+                            style={styles.card}
+                            onPress={() => navigation.navigate('ReportDetail', { reportId: item.id })}
+                        >
+                            <View style={styles.cardContent}>
+                                <Image
+                                    source={{ uri: `${API_URL}${item.reportImages[0]?.imageUrl}` }}
+                                    style={styles.image}
+                                />
+
+                                <View style={styles.rightContent}>
+                                    <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString('hu-HU')}</Text>
+                                    <View style={styles.topRow}>
+                                        <Text style={styles.title}>{item.title}</Text>
+                                    </View>
+
+                                    <Text style={styles.description}>
+                                        {item.description.length > 100
+                                            ? `${item.description.slice(0, 100)}…`
+                                            : item.description}
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.bottomRow}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                                    <View style={{ alignItems: 'flex-start' }}>
+                                        <Text style={{ fontSize: 13, color: '#333' }}>
+                                            {statusMap[item.status]?.label}
+                                        </Text>
+                                        <View style={{
+                                            height: 2,
+                                            width: '60%',
+                                            backgroundColor: statusMap[item.status]?.color,
+                                            marginTop: 2,
+                                            borderRadius: 2,
+                                        }} />
+                                    </View>
+                                    
+                                </View>
+
+                                <Text style={styles.address}>
+                                    {getDistrictFromZip(item.city, item.zipCode)}
+                                </Text>
+
+                            </View>
+                        </Card>
+                    )
+                }}
+                refreshControl={ // ← lehúzásra frissítés
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#009688']} />
                 }
             />
+
+
+        </View>
     );
 };
 
@@ -148,49 +243,82 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FAFAF8',
     },
+    header: {
+        marginTop: 28,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+    },
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 10, // hogy legyen hely a kereső alatt
     },
     backText: {
         fontSize: 16,
+        marginLeft: 4,
         color: 'black',
-        marginLeft: 8,
-    },
-    header: {
-
-        paddingTop: 32,
-        paddingBottom: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FAFAF8'
-    },
-    list: {
-        backgroundColor: '#FAFAF8',
-        padding: 16,
+        flex: 1,
+        textAlign: 'center',
+        marginLeft: 0,
     },
     card: {
-        marginBottom: 16,
+        backgroundColor: '#FFFFFF',
+        marginBottom: 12,
+        borderRadius: 6,
+        overflow: 'hidden',
     },
-    label: {
-        marginTop: 4,
-        color: '#444',
+    cardContent: {
+        flexDirection: 'row',
+        height: 130,
+        padding: 8,
     },
-    historyContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 12,
-        paddingTop: 4,
+    image: {
+        width: 100,
+        height: "100%",
+        borderRadius: 8,
     },
-    historyTitle: {
-        marginTop: 10,
+    rightContent: {
+        flex: 1,
+        paddingLeft: 10,
+        justifyContent: 'flex-start',
+    },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 14,
         fontWeight: 'bold',
-        color: '#333',
+        flex: 1,
+        marginRight: 8,
     },
-    historyItem: {
-        marginTop: 4,
+    date: {
+        textAlign: 'right',
+        fontSize: 10,
+        color: '#888',
     },
-    historyText: {
+    description: {
         fontSize: 13,
+        color: '#333',
+        marginVertical: 4,
+        flexShrink: 1,
+    },
+    bottomRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingBottom: 8,
+        marginTop: -8, // opcionális, ha közelebb akarom hozni
+    },
+    address: {
+        fontSize: 12,
         color: '#555',
     },
+    voteContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
 });

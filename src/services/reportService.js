@@ -3,6 +3,7 @@ import { API_URL } from '../config/apiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 // Képfeltöltés image pickertől 
 export const pickImage = async (images, setImages) => {
@@ -102,13 +103,32 @@ export const isFormValid = ({ title, description, zipCode, address, city, catego
 
 //Felhasználói reportok lekérdezése
 export const fetchUserReports = async () => {
-    const token = await AsyncStorage.getItem("token")
-    const response = await axios.get(`${API_URL}/api/reports/userReports`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
-    return response.data
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/reports/userReports`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Összes report lekérdezése
+export const fetchAllReports = async () => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/reports/getAllReports`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
 }
 
 //Intézményi bejelentések lekérdezése
@@ -123,9 +143,8 @@ export const fetchAssignedReports = async () => {
 };
 
 //Státuszváltás intézményi felhasználótól
-export const updateReportStatus = async (reportId, currentStatus, newStatus, comment = 'Mobil státuszváltás') => {
+export const updateReportStatus = async (reportId, currentStatus, newStatus, comment) => {
     const token = await AsyncStorage.getItem("token");
-
     const payload = {
         statusId: newStatus,
     };
@@ -144,7 +163,6 @@ export const updateReportStatus = async (reportId, currentStatus, newStatus, com
 };
 
 export const getReportById = async (reportId) => {
-
     const token = await AsyncStorage.getItem("token");
     const response = await axios.get(`${API_URL}/api/reports/${reportId}`, {
         headers: {
@@ -154,3 +172,13 @@ export const getReportById = async (reportId) => {
 
     return response.data;
 };
+
+export const getStatusHistory = async (reportId) => {
+    const token = await AsyncStorage.getItem("token")
+    const response = await axios.get(`${API_URL}/api/reports/${reportId}/status-history`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    return response.data
+}

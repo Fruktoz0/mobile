@@ -71,7 +71,14 @@ const AddNewsScreen = ({ navigation }) => {
         }
     };
 
-    const formValid = title && content && institutionId;
+    const formValid = title &&
+        content &&
+        institutionId &&
+        (
+            user?.role === "admin"
+                ? institutionId // adminnál kell választani
+                : true // institution usernél nem kell plusz ellenőrzés
+        );
 
     return (
         <ScrollView style={styles.container}>
@@ -150,6 +157,12 @@ const AddNewsScreen = ({ navigation }) => {
                             ))}
                         </Picker>
                     </View>
+                )}
+
+                {user?.role === "user" && (
+                    <Text style={{ color: "red", textAlign: "center", marginVertical: 20 }}>
+                        Nincs jogosultságod hírt beküldeni.
+                    </Text>
                 )}
 
                 <TextInput

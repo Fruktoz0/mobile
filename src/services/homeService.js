@@ -73,7 +73,8 @@ export const addNews = async (newsData) => {
 // Egy hír részleteinek lekérdezése
 export const getNewsById = async (id) => {
     try {
-        const response = await axios.get(`${API_URL}/api/news/${id}`);
+        const response = await axios.get(`${API_URL}/api/news/${id}`, {
+        });
         return response.data;
     } catch (error) {
         console.error('Hiba történt a hír lekérdezése során:', error);

@@ -37,6 +37,7 @@ const HomeScreen = () => {
     setLoadingNews(true);
     try {
       const newsData = await getAllNews();
+      console.log("Betöltött hírek:", newsData);
       setNews(newsData);
     } catch (err) {
       console.log("Hírek betöltése sikertelen:", err);
