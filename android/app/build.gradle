@@ -92,20 +92,20 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.fruktoz.tisztavaros'
+    namespace "com.fruktoz.tisztavaros"
     defaultConfig {
-        applicationId 'com.fruktoz.tisztavaros'
+        applicationId "com.fruktoz.tisztavaros"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "1.0.0"
+        versionCode 1
+        versionName "1.0"
     }
     signingConfigs {
         debug {
-            storeFile file('tisztavaros.keystore')
-            storePassword 'TisztaAlma2561'
-            keyAlias 'tisztavaros'
-            keyPassword 'TisztaAlma2561'
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
         }
     }
     buildTypes {
