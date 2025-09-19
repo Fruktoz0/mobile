@@ -7,6 +7,7 @@ import { pickImage } from '../../services/reportService';
 import { getAllInstitutions } from '../../services/homeService';
 import { addNews } from '../../services/homeService';
 import { getCurrentUser } from '../../services/authService';
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -81,111 +82,113 @@ const AddNewsScreen = ({ navigation }) => {
         );
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.imageContainer}>
-                <Image
-                    source={
-                        images.length > 0
-                            ? { uri: images[selectedImageIndex].uri }
-                            : require('../../../assets/images/image_placeholder.png')
-                    }
-                    style={styles.largePreview}
-                    resizeMode="cover"
-                />
+        <KeyboardProvider>
+            <ScrollView style={styles.container}>
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={
+                            images.length > 0
+                                ? { uri: images[selectedImageIndex].uri }
+                                : require('../../../assets/images/image_placeholder.png')
+                        }
+                        style={styles.largePreview}
+                        resizeMode="cover"
+                    />
 
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.thumbnailsContainer}
-                >
-                    {images.map((img, idx) => (
-                        <View key={idx} style={styles.thumbnailWrapper}>
-                            <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
-                                <Image
-                                    source={{ uri: img.uri }}
-                                    style={[
-                                        styles.thumbnail,
-                                        idx === selectedImageIndex && styles.selectedThumbnail,
-                                    ]}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.deleteIcon}
-                                onPress={() => handleDeleteImage(idx)}
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.thumbnailsContainer}
+                    >
+                        {images.map((img, idx) => (
+                            <View key={idx} style={styles.thumbnailWrapper}>
+                                <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
+                                    <Image
+                                        source={{ uri: img.uri }}
+                                        style={[
+                                            styles.thumbnail,
+                                            idx === selectedImageIndex && styles.selectedThumbnail,
+                                        ]}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.deleteIcon}
+                                    onPress={() => handleDeleteImage(idx)}
+                                >
+                                    <MaterialCommunityIcons name="close-circle" size={20} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </ScrollView>
+
+                    <Button
+                        mode="outlined"
+                        icon="camera"
+                        onPress={() => pickImage(images, setImages)}
+                        style={styles.imageButton}
+                        textColor="#6BAEA1"
+                        theme={{ colors: { primary: '#6db2a1' } }}
+                    >
+                        Kép feltöltése (max 1)
+                    </Button>
+                    <Text style={styles.optionalNote}>Kép feltöltése nem kötelező</Text>
+                </View>
+
+                <Divider style={styles.divider} />
+
+                <View style={{ margin: 16 }}>
+                    <TextInput
+                        label="Hír címe"
+                        value={title}
+                        onChangeText={setTitle}
+                        mode="outlined"
+                        outlineColor="rgba(107, 174, 161, 0.3)"
+                        style={[styles.input, { backgroundColor: '#FFFFFF' }]}
+                        theme={{ colors: { primary: '#6db2a1' } }}
+                    />
+                    {user?.role === "admin" && (
+                        <View style={[styles.input, styles.pickerContainer]}>
+                            <Picker
+                                selectedValue={institutionId}
+                                onValueChange={(val) => setInstitutionId(val)}
+                                style={styles.picker}
                             >
-                                <MaterialCommunityIcons name="close-circle" size={20} color="red" />
-                            </TouchableOpacity>
+                                <Picker.Item label="Válassz intézményt..." value="" />
+                                {institutions.map((inst) => (
+                                    <Picker.Item key={inst.id} label={inst.name} value={inst.id} />
+                                ))}
+                            </Picker>
                         </View>
-                    ))}
-                </ScrollView>
+                    )}
 
-                <Button
-                    mode="outlined"
-                    icon="camera"
-                    onPress={() => pickImage(images, setImages)}
-                    style={styles.imageButton}
-                    textColor="#6BAEA1"
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                >
-                    Kép feltöltése (max 1)
-                </Button>
-                <Text style={styles.optionalNote}>Kép feltöltése nem kötelező</Text>
-            </View>
+                    {user?.role === "user" && (
+                        <Text style={{ color: "red", textAlign: "center", marginVertical: 20 }}>
+                            Nincs jogosultságod hírt beküldeni.
+                        </Text>
+                    )}
 
-            <Divider style={styles.divider} />
+                    <TextInput
+                        label="Hír tartalma"
+                        value={content}
+                        onChangeText={setContent}
+                        mode="outlined"
+                        outlineColor="rgba(107, 174, 161, 0.3)"
+                        multiline
+                        style={[styles.inputDescription, { backgroundColor: '#FFFFFF' }]}
+                        theme={{ colors: { primary: '#6db2a1' } }}
+                    />
 
-            <View style={{ margin: 16 }}>
-                <TextInput
-                    label="Hír címe"
-                    value={title}
-                    onChangeText={setTitle}
-                    mode="outlined"
-                    outlineColor="rgba(107, 174, 161, 0.3)"
-                    style={[styles.input, { backgroundColor: '#FFFFFF' }]}
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                />
-                {user?.role === "admin" && (
-                    <View style={[styles.input, styles.pickerContainer]}>
-                        <Picker
-                            selectedValue={institutionId}
-                            onValueChange={(val) => setInstitutionId(val)}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Válassz intézményt..." value="" />
-                            {institutions.map((inst) => (
-                                <Picker.Item key={inst.id} label={inst.name} value={inst.id} />
-                            ))}
-                        </Picker>
-                    </View>
-                )}
-
-                {user?.role === "user" && (
-                    <Text style={{ color: "red", textAlign: "center", marginVertical: 20 }}>
-                        Nincs jogosultságod hírt beküldeni.
-                    </Text>
-                )}
-
-                <TextInput
-                    label="Hír tartalma"
-                    value={content}
-                    onChangeText={setContent}
-                    mode="outlined"
-                    outlineColor="rgba(107, 174, 161, 0.3)"
-                    multiline
-                    style={[styles.inputDescription, { backgroundColor: '#FFFFFF' }]}
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                />
-
-                <Button
-                    mode="contained"
-                    onPress={handleSubmit}
-                    style={styles.submitButton}
-                    disabled={!formValid || loading}
-                >
-                    {loading ? <ActivityIndicator animating color="#fff" /> : 'Hír beküldése'}
-                </Button>
-            </View>
-        </ScrollView>
+                    <Button
+                        mode="contained"
+                        onPress={handleSubmit}
+                        style={styles.submitButton}
+                        disabled={!formValid || loading}
+                    >
+                        {loading ? <ActivityIndicator animating color="#fff" /> : 'Hír beküldése'}
+                    </Button>
+                </View>
+            </ScrollView>
+        </KeyboardProvider>
     );
 };
 

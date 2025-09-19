@@ -173,12 +173,78 @@ export const getReportById = async (reportId) => {
     return response.data;
 };
 
-export const getStatusHistory = async (reportId) => {
-    const token = await AsyncStorage.getItem("token")
-    const response = await axios.get(`${API_URL}/api/reports/${reportId}/status-history`, {
-        headers: {
-            Authorization: `Bearer ${token}`
+//Report státusz váltás
+export const changeStatusHistory = async (reportId) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/reports/${reportId}/status-history`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+
+//Adott bejelentés továbbításainak lekérdezése
+export const getForwardLogs = async (reportId) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/reports/${reportId}/forwardLogs`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Adott bejelentés hozzárendelése más intézményhez
+export const reportForward = async (reportId, institutionId, categoryId, reason) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const payload = {
+            institutionId,
+            categoryId,
+            reason
         }
-    })
-    return response.data
+        const response = await axios.put(`${API_URL}/api/reports/forward/${reportId}`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Kategóriák lekérdezése intézmény alapján
+export const getCategoriesByInstitution = async (institutionId) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/categories/byInstitution/${institutionId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Összes intézmény lekérdezése
+export const getInstitutions = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/api/institutions`)
+        return response.data
+    } catch (err) {
+        throw new Error(getErrorMessage(err))
+    }
 }
