@@ -29,11 +29,12 @@ const ReportDetailScreen = ({ route }) => {
     const [statusHistory, setStatusHistory] = useState([]);
     const [newStatus, setNewStatus] = useState(null)
     const [comment, setComment] = useState(null)
+    const [selectedTab, setSelectedTab] = useState(null)
 
 
     const statusMap = {
         open: { label: "Nyitott", color: "#6B7280" },
-        accepted: { label: "Elfogadva", color: "#1976D2" },
+        accepted: { label: "Befogadva", color: "#1976D2" },
         in_progress: { label: "Folyamatban", color: "#8E24AA" },
         forwarded: { label: "Továbbítva", color: "#64B5F6" },
         resolved: { label: "Megoldva", color: "#388E3C" },
@@ -210,68 +211,118 @@ const ReportDetailScreen = ({ route }) => {
             </View>
             <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 8, paddingHorizontal: -14 }}>
             </View>
-            {(userRole === 'admin' || userRole === 'institution') && (
-                <Button
-                    mode="contained"
-                    onPress={() => setStatusMenuVisible(true)}
-                    style={{ marginTop: 8, backgroundColor: '#6BAEA1' }}
-                >
-                    Státusz módosítása
-                </Button>
-            )}
-            {/* Státusz váltás log csak adminnak / intézményi usernek */}
             {(userRole === "admin" || userRole === "institution") && (
-                <View style={styles.logContainer}>
-                    <Text style={styles.section}>Státuszváltások</Text>
-                    {statusHistory.length > 0 ? (
-                        statusHistory.map((history, index) => (
-                            <View key={index} style={styles.timelineItem}>
-                                {/* Timeline marker */}
-                                <View style={styles.timelineMarker}>
-                                    <View
-                                        style={[
-                                            styles.timelineDot,
-                                            { backgroundColor: statusMap[history.status]?.color },
-                                        ]}
-                                    />
-                                    {index !== statusHistory.length - 1 && (
-                                        <View style={styles.timelineLine} />
-                                    )}
-                                </View>
+                <View style={{ marginTop: 16, marginHorizontal: 16 }}>
+                    {/* Fő gomb */}
+                    <Button
+                        mode="contained"
+                        onPress={() => setStatusMenuVisible(true)}
+                        style={{
+                            backgroundColor: "#6DB2A1",
+                            borderRadius: 8,
+                            marginBottom: 16,
+                        }}
+                    >
+                        Státusz módosítása
+                    </Button>
 
-                                {/* Tartalom */}
-                                <View style={styles.timelineContent}>
-                                    <Text
-                                        style={{
-                                            fontSize: 14,
-                                            fontWeight: "600",
-                                            color: statusMap[history.status]?.color,
-                                        }}
-                                    >
-                                        {statusMap[history.status]?.label}
-                                    </Text>
-                                    <Text style={{ fontSize: 12, color: "#444" }}>
-                                        {history.changedBy?.username || "Ismeretlen"}
-                                    </Text>
-                                    <Text style={{ fontSize: 11, color: "#777" }}>
-                                        {new Date(history.changedAt).toLocaleString("hu-HU")}
-                                    </Text>
-                                    {history.comment && (
-                                        <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
-                                            {history.comment}
-                                        </Text>
-                                    )}
-                                </View>
-                            </View>
-                        ))
-                    ) : (
-                        <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
-                            Nincs státuszváltás rögzítve
-                        </Text>
-                    )}
+                    {/* Tab választó */}
+                    <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 12, }}>
+                        <TouchableOpacity
+                            onPress={() => setSelectedTab("status")}
+                            style={{
+                                flex: 1,
+                                paddingVertical: 8,
+                                backgroundColor: selectedTab === "status" ? "#6DB2A1" : "#E5E7EB",
+                                borderTopLeftRadius: 8,
+                                borderBottomLeftRadius: 8,
+                            }}
+                        >
+                            <Text style={{ textAlign: "center", color: selectedTab === "status" ? "#fff" : "#333" }}>
+                                Státuszváltások
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setSelectedTab("forward")}
+                            style={{
+                                flex: 1,
+                                paddingVertical: 8,
+                                backgroundColor: selectedTab === "forward" ? "#6DB2A1" : "#E5E7EB",
+                                borderTopRightRadius: 8,
+                                borderBottomRightRadius: 8,
+                            }}
+                        >
+                            <Text style={{ textAlign: "center", color: selectedTab === "forward" ? "#fff" : "#333" }}>
+                                Továbbítási előzmények
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
+                    {/* Tartalom */}
+                    <View style={styles.logContainer}>
+                        {selectedTab === "status" ? (
+                            <>
+                                <Text style={styles.section}>Státuszváltások</Text>
+                                {statusHistory.length > 0 ? (
+                                    statusHistory.map((history, index) => (
+                                        <View key={index} style={styles.timelineItem}>
+                                            {/* Timeline marker */}
+                                            <View style={styles.timelineMarker}>
+                                                <View
+                                                    style={[
+                                                        styles.timelineDot,
+                                                        { backgroundColor: statusMap[history.status]?.color },
+                                                    ]}
+                                                />
+                                                {index !== statusHistory.length - 1 && (
+                                                    <View style={styles.timelineLine} />
+                                                )}
+                                            </View>
+
+                                            {/* Tartalom */}
+                                            <View style={styles.timelineContent}>
+                                                <Text
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: "600",
+                                                        color: statusMap[history.status]?.color,
+                                                    }}
+                                                >
+                                                    {statusMap[history.status]?.label}
+                                                </Text>
+                                                <Text style={{ fontSize: 12, color: "#444" }}>
+                                                    {history.changedBy?.username || "Ismeretlen"}
+                                                </Text>
+                                                <Text style={{ fontSize: 11, color: "#777" }}>
+                                                    {new Date(history.changedAt).toLocaleString("hu-HU")}
+                                                </Text>
+                                                {history.comment && (
+                                                    <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                                                        {history.comment}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
+                                        Nincs státuszváltás rögzítve
+                                    </Text>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <Text style={styles.section}>Továbbítási előzmények</Text>
+                                {/* ide jön majd a forwardingLog adataid renderelése */}
+                                <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
+                                    (Itt jön majd a továbbítási log lista)
+                                </Text>
+                            </>
+                        )}
+                    </View>
                 </View>
             )}
+
 
             <Portal>
 
@@ -451,6 +502,7 @@ const styles = StyleSheet.create({
 
     logContainer: {
         marginTop: 20,
+        marginBottom: 20,
         marginHorizontal: 16,
         padding: 16,
         backgroundColor: "#fff",
