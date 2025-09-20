@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
-import { useState, useEffect,  } from 'react'
+import { useState, useEffect, } from 'react'
 import { Plus, Star, Lock } from 'lucide-react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { jwtDecode } from 'jwt-decode';
 import { useNavigation } from '@react-navigation/native'
 import { API_URL } from '../config/apiConfig'
 import { getAllActiveChallenges, unlockChallenge } from '../services/challengeService'
+import { getUserProfile } from '../services/profileService';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 
 
 const ChallengesScreen = () => {
@@ -18,11 +20,8 @@ const ChallengesScreen = () => {
 
   //Felhasználó lekérése
   const loadUser = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUser(decoded);
-    }
+    const user = await getUserProfile()
+    setUser(user);
   };
 
   const loadChallenges = async () => {
@@ -37,10 +36,12 @@ const ChallengesScreen = () => {
     }
   }
 
-  useEffect(() => {
-    loadUser();
-    loadChallenges()
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      loadUser();
+      loadChallenges()
+    }, [])
+  )
 
   const handleChallengePress = (item) => {
     if (!user) {
@@ -72,10 +73,9 @@ const ChallengesScreen = () => {
                 Alert.alert("Siker!", "A kihívás feloldva.");
                 // frissítsük a user pontjait és a challenge állapotát
                 setUser({ ...user, points: result.currentPoints });
-                setChallenges((prev) =>
-                  prev.map((ch) => ch.id === item.id ? { ...ch, isUnlocked: true } : ch)
-                );
+                loadUser()
                 navigation.navigate('ChallengeDetail', { challenge: { ...item, isUnlocked: true } });
+
               } catch (err) {
                 Alert.alert("Hiba", err.response?.data?.message || "Nem sikerült feloldani a kihívást.");
               }
@@ -159,7 +159,6 @@ const ChallengesScreen = () => {
   )
 }
 
-
 export default ChallengesScreen
 
 
@@ -168,6 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9F9F9',
     padding: 10,
+    marginTop: 40,
   },
   card: {
     backgroundColor: '#fff',

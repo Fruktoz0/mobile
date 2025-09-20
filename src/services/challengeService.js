@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_URL } from "../config/apiConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 
 //Kihívás létrehozása
@@ -71,7 +72,23 @@ export const unlockChallenge = async (challengeId) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Hiba a kihívás feloldásakor:", error.response?.data || error.message);
-        throw error;
+        console.error(getErrorMessage(error));
+        throw new Error(getErrorMessage(error))
     }
 };
+
+//Felhasználó saját kihívásainak lekérése
+export const getMyChallenges = async () => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/challenges/myChallenges`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}

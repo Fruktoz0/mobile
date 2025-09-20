@@ -11,8 +11,19 @@ import { API_URL } from "../config/apiConfig";
 const ChallengeDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { challenge } = route.params;
+  const { userChallenge } = route.params;
+  const challenge = userChallenge.challenge
+  const status = userChallenge.status
   const [remainingTime, setRemainingTime] = useState("");
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const statusButtonLabels = {
+    pending: "Elbírálás alatt",
+    approved: "Jóváhagyva",
+    rejected: "Elutasítva",
+    expired: "Lejárt"
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -53,12 +64,12 @@ const ChallengeDetailsScreen = () => {
           {/* Title */}
           <Text style={styles.title}>{challenge.title}</Text>
 
-          {/* Meta adatok ikonokkal */}
+          {/*Adatok ikonokkal */}
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <MaterialCommunityIcons name="calendar" size={16} color="#777" />
               <Text style={styles.meta}>
-                {moment(challenge.unlockDate).format("YYYY.MM.DD")}
+                {new Date(challenge.startDate).toISOString().split("T")[0]}
               </Text>
             </View>
             <View style={styles.metaItem}>
@@ -87,18 +98,28 @@ const ChallengeDetailsScreen = () => {
             <Text style={styles.taskText}>{challenge.description}</Text>
           </View>
 
-          {/* Gomb */}
-          <Button
-            mode="contained"
-            style={styles.submitButton}
-            textColor="#fff"
-            theme={{ colors: { primary: "#4A90E2" } }}
-            onPress={() =>
-              navigation.navigate("ChallengeSubmit", { challengeId: challenge.id })
-            }
-          >
-            Készre jelentés
-          </Button>
+          {/* Készre jelentés gomb */}
+          {challenge.endDate < today ? (
+            <Text style={styles.expiredText}>
+              Lejárt, figyeld az új kihívásokat!
+            </Text>
+          ) : (
+            <Button
+              mode="contained"
+              style={styles.submitButton}
+              textColor="#fff"
+              theme={{ colors: { primary: "#4A90E2" } }}
+              disabled={status !== "unlocked"}
+              onPress={() =>
+                navigation.navigate("ChallengeSubmit", { challengeId: challenge.id })
+              }
+            >
+              {statusButtonLabels[status] || "Készre jelentés"}
+            </Button>
+          )
+
+          }
+
         </View>
       </ScrollView>
     </ImageBackground>
@@ -204,4 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 6,
   },
+  expiredText: {
+    textAlign: "center",
+    color: "#E74C3C",
+    fontWeight: "600",
+    marginTop: 8,
+  }
+
 });
