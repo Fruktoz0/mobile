@@ -248,3 +248,21 @@ export const getInstitutions = async () => {
         throw new Error(getErrorMessage(err))
     }
 }
+
+//Adott bejelentés megerősítése
+export const confirmReport = async (reportId) => {
+    try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await axios.put(
+            `${API_URL}/api/reports/${reportId}/confirm`, {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (err) {
+        throw new Error(getErrorMessage(err));
+    }
+};

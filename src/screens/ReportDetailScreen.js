@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import { Avatar, Button, Divider, Dialog, Portal, TextInput, HelperText, List, Menu } from 'react-native-paper'
 import Carousel, { Pagination } from 'react-native-reanimated-carousel';
 import { MapLibreGL } from '../config/mapConfig';
-import { getCategoriesByInstitution, getForwardLogs, getInstitutions, getReportById } from '../services/reportService'
+import { confirmReport, getCategoriesByInstitution, getForwardLogs, getInstitutions, getReportById } from '../services/reportService'
 import * as Location from 'expo-location';
 import { useState, useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
@@ -99,6 +99,16 @@ const ReportDetailScreen = ({ route }) => {
         try {
             const data = await getCategoriesByInstitution(forwardInstitution)
             setCategories(data)
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const handleConfirm = async () => {
+        try {
+            await confirmReport(reportId)
+
+            await loadReport()
         } catch (err) {
             console.error(err)
         }
@@ -201,11 +211,8 @@ const ReportDetailScreen = ({ route }) => {
                 <Text style={styles.title}>{report.title}</Text>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
-                    <Text>Beküldő</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-
-
-                    </View>
+                    <Text>Id</Text>
+                    <Text>#{report.id}</Text>
                 </View>
                 <Divider />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
@@ -219,6 +226,11 @@ const ReportDetailScreen = ({ route }) => {
                 </View>
                 <Divider />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                    <Text>Megerősítve</Text>
+                    <Text>{report.confirmed} alkalommal</Text>
+                </View>
+                <Divider />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
                     <Text>Kategória</Text>
                     <Text style={styles.category}>{report.category.categoryName || 'Nincs kategória'}</Text>
                 </View>
@@ -228,11 +240,23 @@ const ReportDetailScreen = ({ route }) => {
                     <Text>Státusz</Text>
                     <Text style={{ color: statusMap[report.status]?.color }}>{statusMap[report.status]?.label || report.status}</Text>
                 </View>
-                <Button
-                    style={styles.confirmButton}
-                    textColor="#6BAEA1"
-                    theme={{ colors: { primary: '#6db2a1' } }}
-                >Megerősítem</Button>
+                {report.hasConfirmed ? (
+                    <Image
+                        source={require('../../assets/images/confirmed_1.png')}
+                        style={{
+                            width: 111, height: 100, alignSelf: 'center', marginTop: -50
+                        }}
+                        resizeMode="contain"
+                    />
+                ) : (
+                    <Button
+                        style={styles.confirmButton}
+                        textColor="#6BAEA1"
+                        theme={{ colors: { primary: '#6db2a1' } }}
+                        onPress={handleConfirm}
+                    >Megerősítem</Button>
+                )
+                }
             </View>
             <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 8, paddingHorizontal: -14 }}>
             </View>
@@ -269,127 +293,129 @@ const ReportDetailScreen = ({ route }) => {
             </View>
             <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 8, paddingHorizontal: -14 }}>
             </View>
-            {(userRole === "admin" || (userRole === "institution" && userInstitutionId === report.institutionId)) && (
-                <View style={{ flex: 1, flexDirection: "column", marginTop: 16, marginHorizontal: 16 }}>
-                    {/* Fő gomb */}
-                    <Button
-                        mode="contained"
-                        onPress={() => {
-                            resetDialog()
-                            setStatusMenuVisible(true)
-                        }}
-                        style={{
-                            backgroundColor: "#6DB2A1",
-                            borderRadius: 8,
-                            marginBottom: 16,
-                        }}
-                    >
-                        Státusz módosítása
-                    </Button>
-                    <Button
-                        mode="contained"
-                        onPress={() => {
-                            resetDialog()
-                            setForwardMenuVisible(true)
-                        }}
-                        style={{
-                            backgroundColor: "#6DB2A1",
-                            borderRadius: 8,
-                            marginBottom: 16,
-                        }}
-                    >
-                        Bejelentés továbbítása
-                    </Button>
-                    <List.Section>
-                        <List.Accordion
-                            title="Státuszváltások"
-                            titleStyle={{ fontWeight: "bold", fontSize: 16 }}
-                            left={props => <List.Icon {...props} icon="history" />}
+            {
+                (userRole === "admin" || (userRole === "institution" && userInstitutionId === report.institutionId)) && (
+                    <View style={{ flex: 1, flexDirection: "column", marginTop: 16, marginHorizontal: 16 }}>
+                        {/* Fő gomb */}
+                        <Button
+                            mode="contained"
+                            onPress={() => {
+                                resetDialog()
+                                setStatusMenuVisible(true)
+                            }}
+                            style={{
+                                backgroundColor: "#6DB2A1",
+                                borderRadius: 8,
+                                marginBottom: 16,
+                            }}
                         >
-                            {statusHistory.length > 0 ? (
-                                statusHistory.map((history, index) => (
-                                    <View key={index} style={styles.timelineItem}>
-                                        {/* Bal oldali marker oszlop */}
-                                        <View style={styles.timelineMarker}>
-                                            <View
-                                                style={[
-                                                    styles.timelineDot,
-                                                    { backgroundColor: statusMap[history.status]?.color }
-                                                ]}
-                                            />
-                                            {index !== statusHistory.length - 1 && (
-                                                <View style={styles.timelineLine} />
-                                            )}
-                                        </View>
+                            Státusz módosítása
+                        </Button>
+                        <Button
+                            mode="contained"
+                            onPress={() => {
+                                resetDialog()
+                                setForwardMenuVisible(true)
+                            }}
+                            style={{
+                                backgroundColor: "#6DB2A1",
+                                borderRadius: 8,
+                                marginBottom: 16,
+                            }}
+                        >
+                            Bejelentés továbbítása
+                        </Button>
+                        <List.Section>
+                            <List.Accordion
+                                title="Státuszváltások"
+                                titleStyle={{ fontWeight: "bold", fontSize: 16 }}
+                                left={props => <List.Icon {...props} icon="history" />}
+                            >
+                                {statusHistory.length > 0 ? (
+                                    statusHistory.map((history, index) => (
+                                        <View key={index} style={styles.timelineItem}>
+                                            {/* Bal oldali marker oszlop */}
+                                            <View style={styles.timelineMarker}>
+                                                <View
+                                                    style={[
+                                                        styles.timelineDot,
+                                                        { backgroundColor: statusMap[history.status]?.color }
+                                                    ]}
+                                                />
+                                                {index !== statusHistory.length - 1 && (
+                                                    <View style={styles.timelineLine} />
+                                                )}
+                                            </View>
 
-                                        {/* Jobb oldali tartalom */}
-                                        <View style={styles.timelineContent}>
-                                            <Text
-                                                style={{
-                                                    fontSize: 14,
-                                                    fontWeight: "600",
-                                                    color: statusMap[history.status]?.color,
-                                                }}
-                                            >
-                                                {statusMap[history.status]?.label}
+                                            {/* Jobb oldali tartalom */}
+                                            <View style={styles.timelineContent}>
+                                                <Text
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: "600",
+                                                        color: statusMap[history.status]?.color,
+                                                    }}
+                                                >
+                                                    {statusMap[history.status]?.label}
+                                                </Text>
+                                                <Text style={{ fontSize: 12, color: "#444" }}>
+                                                    {history.changedBy?.username || "Ismeretlen"}
+                                                </Text>
+                                                <Text style={{ fontSize: 11, color: "#777" }}>
+                                                    {new Date(history.changedAt).toLocaleString("hu-HU")}
+                                                </Text>
+                                                {history.comment && (
+                                                    <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
+                                                        {history.comment}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
+                                        Nincs Státuszváltás rögzítve
+                                    </Text>
+                                )
+                                }
+                            </List.Accordion>
+                            {/* Továbbítási előzmények */}
+
+                            <List.Accordion
+                                title="Továbbítási előzmények"
+                                titleStyle={{ fontWeight: "bold", fontSize: 16 }}
+                                left={props => <List.Icon {...props} icon="share" />}
+                                style={{ marginBottom: 16 }}
+                            >
+                                {forwardLogs.length > 0 ? (
+                                    forwardLogs.map((log, index) => (
+                                        <View key={index} style={{ marginBottom: 50, paddingLeft: 8, alignItems: "center" }}>
+                                            <Text style={{ fontSize: 14, fontWeight: "600", color: "#333", }}>
+                                                {log.forwardedFrom?.name || "Ismeretlen"} ➝ {log.forwardedTo?.name || "Ismeretlen"}
                                             </Text>
-                                            <Text style={{ fontSize: 12, color: "#444" }}>
-                                                {history.changedBy?.username || "Ismeretlen"}
+                                            <Text style={{ fontSize: 12, color: "#555" }}>
+                                                Továbbította: {log.forwardedByUser?.username || "Ismeretlen"} | {new Date(log.forwardedAt).toLocaleString("hu-HU")}
                                             </Text>
-                                            <Text style={{ fontSize: 11, color: "#777" }}>
-                                                {new Date(history.changedAt).toLocaleString("hu-HU")}
-                                            </Text>
-                                            {history.comment && (
-                                                <Text style={{ fontSize: 12, color: "#555", marginTop: 2 }}>
-                                                    {history.comment}
+                                            {log.reason && (
+                                                <Text style={{ fontSize: 12, color: "#777", marginTop: 2 }}>
+                                                    Indoklás: {log.reason}
                                                 </Text>
                                             )}
                                         </View>
-                                    </View>
-                                ))
-                            ) : (
-                                <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
-                                    Nincs Státuszváltás rögzítve
-                                </Text>
-                            )
-                            }
-                        </List.Accordion>
-                        {/* Továbbítási előzmények */}
-
-                        <List.Accordion
-                            title="Továbbítási előzmények"
-                            titleStyle={{ fontWeight: "bold", fontSize: 16 }}
-                            left={props => <List.Icon {...props} icon="share" />}
-                            style={{ marginBottom: 16 }}
-                        >
-                            {forwardLogs.length > 0 ? (
-                                forwardLogs.map((log, index) => (
-                                    <View key={index} style={{ marginBottom: 50, paddingLeft: 8, alignItems: "center" }}>
-                                        <Text style={{ fontSize: 14, fontWeight: "600", color: "#333", }}>
-                                            {log.forwardedFrom?.name || "Ismeretlen"} ➝ {log.forwardedTo?.name || "Ismeretlen"}
-                                        </Text>
-                                        <Text style={{ fontSize: 12, color: "#555" }}>
-                                            Továbbította: {log.forwardedByUser?.username || "Ismeretlen"} | {new Date(log.forwardedAt).toLocaleString("hu-HU")}
-                                        </Text>
-                                        {log.reason && (
-                                            <Text style={{ fontSize: 12, color: "#777", marginTop: 2 }}>
-                                                Indoklás: {log.reason}
-                                            </Text>
-                                        )}
-                                    </View>
-                                ))
-                            ) : (
-                                <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
-                                    Nincs továbbítás rögzítve
-                                </Text>
-                            )}
-                        </List.Accordion>
+                                    ))
+                                ) : (
+                                    <Text style={{ fontSize: 13, color: "#666", marginTop: 4 }}>
+                                        Nincs továbbítás rögzítve
+                                    </Text>
+                                )}
+                            </List.Accordion>
 
 
 
-                    </List.Section>
-                </View>
-            )}
+                        </List.Section>
+                    </View>
+                )
+            }
 
             {/*Státusz váltás dialog */}
             <Portal>
@@ -691,7 +717,7 @@ const ReportDetailScreen = ({ route }) => {
             </Portal>
 
 
-        </ScrollView>
+        </ScrollView >
     )
 }
 
