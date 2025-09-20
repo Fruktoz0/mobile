@@ -14,8 +14,8 @@ export const createChallenge = async (challengeData) => {
         formData.append("costPoints", challengeData.costPoints);
         formData.append("rewardPoints", challengeData.rewardPoints);
         formData.append("category", challengeData.category);
-        formData.append("startDate", challengeData.startDate.toISOString());
-        formData.append("endDate", challengeData.endDate.toISOString());
+        formData.append("startDate", challengeData.startDate.toISOString().split("T")[0]);
+        formData.append("endDate", challengeData.endDate.toISOString().split("T")[0]);
         formData.append("institutionId", challengeData.institutionId);
 
         // ha van kép
@@ -44,7 +44,7 @@ export const createChallenge = async (challengeData) => {
     }
 };
 
-//Kihívások listázása
+//Összes aktív kihívás listázása
 export const getAllActiveChallenges = async () => {
     try {
         const token = await AsyncStorage.getItem("token");
