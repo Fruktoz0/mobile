@@ -30,14 +30,16 @@ const ChallengeDetailsScreen = () => {
       if (challenge.endDate) {
         const end = moment(challenge.endDate);
         const now = moment();
-        const diff = end.diff(now);
-        if (diff <= 0) {
+
+        if (end.isBefore(now)) {
           setRemainingTime("Lejárt");
         } else {
-          const duration = moment.duration(diff);
-          setRemainingTime(
-            `${duration.days()} nap ${duration.hours()} óra ${duration.minutes()} perc`
-          );
+          const totalMinutes = end.diff(now, "minutes");
+          const days = Math.floor(totalMinutes / (60 * 24));
+          const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+          const minutes = totalMinutes % 60;
+
+          setRemainingTime(`${days} nap ${hours} óra ${minutes} perc`);
         }
       }
     }, [challenge.endDate])

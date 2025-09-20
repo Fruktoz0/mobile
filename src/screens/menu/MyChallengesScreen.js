@@ -59,6 +59,11 @@ const MyChallengesScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         refreshing={loadingChallenges}
         onRefresh={loadChallenges}
+        ListEmptyComponent={
+          !loadingChallenges && (
+            <Text style={styles.emptyText}>Még nem oldottál fel kihívást</Text>
+          )
+        }
         renderItem={({ item }) => {
 
 
@@ -227,5 +232,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#4A90E2",
   },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
+    color: "#777",
+    fontWeight: "500",
+  }
+
 
 });
