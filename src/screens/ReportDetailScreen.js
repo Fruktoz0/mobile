@@ -4,7 +4,7 @@ import { Image, Dimensions, } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { Avatar, Button, Divider, Dialog, Portal, TextInput, HelperText, List, Menu } from 'react-native-paper'
-import Carousel, { Pagination } from 'react-native-reanimated-carousel';
+import Carousel from 'react-native-reanimated-carousel';
 import { MapLibreGL } from '../config/mapConfig';
 import { confirmReport, getCategoriesByInstitution, getForwardLogs, getInstitutions, getReportById } from '../services/reportService'
 import * as Location from 'expo-location';
@@ -715,8 +715,6 @@ const ReportDetailScreen = ({ route }) => {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
-
-
         </ScrollView >
     )
 }
@@ -726,7 +724,6 @@ export default ReportDetailScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        //padding: 16,
         backgroundColor: '#FAFAF8',
     },
     backButton: {

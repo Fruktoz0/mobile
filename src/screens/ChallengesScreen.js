@@ -1,65 +1,56 @@
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
-import { useState, useEffect, } from 'react'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, Alert } from 'react-native'
+import { useState } from 'react'
 import { Plus, Star, Lock } from 'lucide-react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { API_URL } from '../config/apiConfig'
 import { getAllActiveChallenges, unlockChallenge } from '../services/challengeService'
-import { getUserProfile } from '../services/profileService';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-
-
+import { getUserProfile } from '../services/profileService'
+import { useCallback } from 'react'
+import { getErrorMessage } from '../utils/getErrorMessage'
 
 const ChallengesScreen = () => {
-
   const [challenges, setChallenges] = useState([])
   const [loadingChallenges, setLoadingChallenges] = useState(false)
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null)
 
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
-  //Felhasználó lekérése
   const loadUser = async () => {
     const user = await getUserProfile()
-    setUser(user);
-  };
+    setUser(user)
+  }
 
   const loadChallenges = async () => {
-    setLoadingChallenges(true);
+    setLoadingChallenges(true)
     try {
-      const challengesData = await getAllActiveChallenges();
-      setChallenges(challengesData);
+      const challengesData = await getAllActiveChallenges()
+      setChallenges(challengesData)
     } catch (err) {
-      console.log("Kihívások betöltése sikertelen:", err);
+      console.log("Kihívások betöltése sikertelen:", err)
     } finally {
-      setLoadingChallenges(false);
+      setLoadingChallenges(false)
     }
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadUser();
+      loadUser()
       loadChallenges()
     }, [])
   )
 
   const handleChallengePress = (item) => {
     if (!user) {
-      Alert.alert("Bejelentkezés szükséges", "Kérlek jelentkezz be a kihívás megnyitásához.");
-      return;
+      Alert.alert("Bejelentkezés szükséges", "Kérlek jelentkezz be a kihívás megnyitásához.")
+      return
     }
 
-    // ha nincs elég pont
-    if (user.points < item.costPoints) {
-      Alert.alert(
-        "Nincs elég pontod",
-        `Ehhez a kihíváshoz ${item.costPoints} pont szükséges. Neked jelenleg ${user.points} pontod van.`
-      );
-      return;
-    }
+    const userStatus = item.userChallenges?.[0]?.status
+    const unlockedStatuses = ["unlocked", "pending", "approved", "rejected"]
+    const isUnlocked = unlockedStatuses.includes(userStatus)
 
     // ha még nincs unlock
-    if (!item.isUnlocked) {
+    if (!isUnlocked) {
       Alert.alert(
         "Megvásárlás megerősítése",
         `Biztosan megveszed ezt a kihívást ${item.costPoints} pontért?`,
@@ -69,26 +60,28 @@ const ChallengesScreen = () => {
             text: "Igen",
             onPress: async () => {
               try {
-                const result = await unlockChallenge(item.id);
-                Alert.alert("Siker!", "A kihívás feloldva.");
-                // frissítsük a user pontjait és a challenge állapotát
-                setUser({ ...user, points: result.currentPoints });
+                const result = await unlockChallenge(item.id)
+                Alert.alert("Siker!", result.message)
+                setUser({ ...user, points: result.currentPoints })
                 loadUser()
-                navigation.navigate('ChallengeDetail', { challenge: { ...item, isUnlocked: true } });
-
+                navigation.navigate('ChallengeDetail', { 
+                  userChallenge: { ...item, status: "unlocked", challengeId: item.id } 
+                })
               } catch (err) {
-                Alert.alert("Hiba", err.response?.data?.message || "Nem sikerült feloldani a kihívást.");
+                Alert.alert("Hiba", getErrorMessage(err))
               }
             }
           }
         ]
-      );
-      return;
+      )
+      return
     }
 
-    // ha már unlockolta
-    navigation.navigate('ChallengeDetail', { challenge: item });
-  };
+    // ha már unlockolta (unlocked, pending, approved, rejected)
+    navigation.navigate('ChallengeDetail', { 
+      userChallenge: { ...item, status: userStatus, challengeId: item.id } 
+    })
+  }
 
   return (
     <View style={styles.container}>
@@ -98,7 +91,9 @@ const ChallengesScreen = () => {
         refreshing={loadingChallenges}
         onRefresh={loadChallenges}
         renderItem={({ item }) => {
-          const locked = !item.isUnlocked;
+          const userStatus = item.userChallenges?.[0]?.status
+          const unlockedStatuses = ["unlocked", "pending", "approved", "rejected"]
+          const isUnlocked = unlockedStatuses.includes(userStatus)
 
           return (
             <TouchableOpacity
@@ -112,7 +107,7 @@ const ChallengesScreen = () => {
                   <Text style={styles.categoryText}>{item.category}</Text>
                 </View>
 
-                {locked && (
+                {!isUnlocked && (
                   <View style={styles.lockOverlay}>
                     <Lock size={40} color="#fff" />
                     <Text style={styles.lockText}>{item.costPoints}p</Text>
@@ -160,7 +155,6 @@ const ChallengesScreen = () => {
 }
 
 export default ChallengesScreen
-
 
 const styles = StyleSheet.create({
   container: {
@@ -268,4 +262,4 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-});
+})

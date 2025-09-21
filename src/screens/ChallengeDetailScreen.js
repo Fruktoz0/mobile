@@ -7,14 +7,19 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import moment from "moment";
 import { API_URL } from "../config/apiConfig";
+import { getChallengeById } from "../services/challengeService";
+import { getUserProfile } from "../services/profileService";
 
 const ChallengeDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userChallenge } = route.params;
-  const challenge = userChallenge.challenge
+  const challengeId = userChallenge.challengeId
   const status = userChallenge.status
   const [remainingTime, setRemainingTime] = useState("");
+  const [challenge, setChallenge] = useState(null)
+  const [user, setUser] = useState(null)
+
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -25,9 +30,35 @@ const ChallengeDetailsScreen = () => {
     expired: "Lejárt"
   };
 
+  //Tiltás admin és intézménynek a saját intézményi kihívásaihoz
+  const canSubmit = user && challenge && (
+    user.role !== "admin" && !(user.role === "institution" && user.institutionId === challenge.institutionId)
+  )
+
+  const loadChallengeDetails = async () => {
+    try {
+      const data = await getChallengeById(challengeId)
+      setChallenge(data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const loadUser = async () => {
+    const user = await getUserProfile()
+    setUser(user)
+  }
+
   useFocusEffect(
     useCallback(() => {
-      if (challenge.endDate) {
+      loadChallengeDetails()
+      loadUser()
+    }, [challengeId])
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      if (challenge?.endDate) {
         const end = moment(challenge.endDate);
         const now = moment();
 
@@ -42,31 +73,34 @@ const ChallengeDetailsScreen = () => {
           setRemainingTime(`${days} nap ${hours} óra ${minutes} perc`);
         }
       }
-    }, [challenge.endDate])
+    }, [challenge?.endDate])
   );
+  if (!challenge) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Betöltés...</Text>
+      </View>
+    )
+  }
 
   return (
     <ImageBackground
-      source={{ uri: `${API_URL}${challenge.image}` }}
+      source={{ uri: `${API_URL}${challenge?.image}` }}
       style={styles.background}
       resizeMode="cover"
     >
       <View style={styles.overlay} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* CARD */}
         <View style={styles.card}>
-          {/* Badge */}
           <View style={styles.badgeWrapper}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>Kihívás</Text>
             </View>
           </View>
 
-          {/* Title */}
           <Text style={styles.title}>{challenge.title}</Text>
 
-          {/*Adatok ikonokkal */}
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <MaterialCommunityIcons name="calendar" size={16} color="#777" />
@@ -80,7 +114,7 @@ const ChallengeDetailsScreen = () => {
             </View>
           </View>
 
-          {/* Fix leírás */}
+
           <View style={styles.infoBox}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={styles.infoTitle}>Hogyan működik?</Text>
@@ -94,33 +128,34 @@ const ChallengeDetailsScreen = () => {
             </Text>
           </View>
 
-          {/* Kihívás leírása */}
           <View style={styles.taskBox}>
             <Text style={styles.taskTitle}>Feladat</Text>
             <Text style={styles.taskText}>{challenge.description}</Text>
           </View>
 
-          {/* Készre jelentés gomb */}
-          {challenge.endDate < today ? (
-            <Text style={styles.expiredText}>
-              Lejárt, figyeld az új kihívásokat!
-            </Text>
-          ) : (
-            <Button
-              mode="contained"
-              style={styles.submitButton}
-              textColor="#fff"
-              theme={{ colors: { primary: "#4A90E2" } }}
-              disabled={status !== "unlocked"}
-              onPress={() =>
-                navigation.navigate("ChallengeSubmit", { challengeId: challenge.id })
-              }
-            >
-              {statusButtonLabels[status] || "Készre jelentés"}
-            </Button>
-          )
+          {canSubmit && (
 
-          }
+            challenge.endDate < today ? (
+              <Text style={styles.expiredText}>
+                Lejárt, figyeld az új kihívásokat!
+              </Text>
+            ) : (
+              <Button
+                mode="contained"
+                style={styles.submitButton}
+                textColor="#fff"
+                theme={{ colors: { primary: "#4A90E2" } }}
+                disabled={status !== "unlocked"}
+                onPress={() =>
+                  navigation.navigate("ChallengeSubmit", { challengeId: challenge.id })
+                }
+              >
+                {statusButtonLabels[status] || "Készre jelentés"}
+              </Button>
+            )
+
+          )}
+
 
         </View>
       </ScrollView>

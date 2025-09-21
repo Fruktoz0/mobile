@@ -1,8 +1,7 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native'
-import { List, Avatar, Button } from 'react-native-paper'
+import { List, Avatar, Button, Divider } from 'react-native-paper'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react'
 import { fetchUserData } from '../hooks/fetchUserData';
 import { useFocusEffect } from '@react-navigation/native';
@@ -39,29 +38,66 @@ const MenuScreen = () => {
                         </View>
                     )}
                 </View>
+                {userData?.role === "institution" && userData?.institutionId &&
+                    <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "bold", color: "#666" }}>
+                            Felhasználói nézet
+                        </Text>
+                        <View style={{ height: 1, backgroundColor: "#ddd", marginTop: 4 }} />
+                    </View>
+                }
                 <List.Section>
                     <List.Item style={styles.item} title="Profilom" left={props => <List.Icon {...props} icon="account-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Profile')} />
 
                     <List.Item style={styles.item} title="Bejelentéseim" left={props => <List.Icon {...props} icon="file-document-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyReports')} />
 
-                    {userData?.role === "institution" && userData?.institutionId && (
-                        <List.Item
-                            style={styles.item}
-                            title={`Intézményem bejelentései (${userData.institution?.name || 'ismeretlen'})`}
-                            left={props => <List.Icon {...props} icon="office-building-outline" />}
-                            right={props => <List.Icon {...props} icon="chevron-right" />}
-                            onPress={() => navigation.navigate('InstitutionReports')}
-                        />
-                    )}
-
                     <List.Item style={styles.item} title="Jelvényeim" left={props => <List.Icon {...props} icon="trophy-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyBadges')} />
 
                     <List.Item style={styles.item} title="Kihívásaim" left={props => <List.Icon {...props} icon="trophy-variant-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('MyChallenges')} />
 
+
+
                     <List.Item style={styles.item} title="GY.I.K" left={props => <List.Icon {...props} icon="help-circle-outline" />} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('FAQ')} />
                 </List.Section>
-
+                {userData?.role === "institution" && userData?.institutionId &&
+                    <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
+                        <Text style={{ fontSize: 14, fontWeight: "bold", color: "#666" }}>
+                            Intézményi nézet {userData?.institution?.name}
+                        </Text>
+                        <View style={{ height: 1, backgroundColor: "#ddd", marginTop: 4 }} />
+                    </View>
+                }
             </View>
+
+
+            {userData?.role === "institution" && userData?.institutionId && (
+                <>
+                    <List.Item
+                        style={styles.item}
+                        title={'Kihívások'}
+                        left={props => <List.Icon {...props} icon="trophy-variant-outline" />}
+                        right={props => <List.Icon {...props} icon="chevron-right" />}
+                        onPress={() => navigation.navigate('InstitutionChallenges')}
+                    />
+                    <List.Item
+                        style={{ paddingTop: -14 }}
+                        title={'Elkezdett kihívások'}
+                        left={props => <List.Icon {...props} icon="circle-small" />} // kisebb jelölő
+                        right={props => <List.Icon {...props} icon="chevron-right" />}
+                        onPress={() => navigation.navigate('InstitutionSubmissions')}
+                    />
+                </>
+            )}
+
+            {userData?.role === "institution" && userData?.institutionId && (
+                <List.Item
+                    style={styles.item}
+                    title={'Bejelentések'}
+                    left={props => <List.Icon {...props} icon="file-document-outline" />}
+                    right={props => <List.Icon {...props} icon="chevron-right" />}
+                    onPress={() => navigation.navigate('InstitutionReports')}
+                />
+            )}
         </ScrollView>
     )
 }

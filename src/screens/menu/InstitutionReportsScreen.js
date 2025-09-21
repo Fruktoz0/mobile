@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl, Image, TextInput } from 'react-native';
-import { Card, IconButton, Searchbar, Menu } from 'react-native-paper';
+import { Card, IconButton, Menu } from 'react-native-paper';
 import { fetchAssignedReports, updateReportStatus } from '../../services/reportService';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
@@ -48,7 +48,7 @@ const InstitutionReportsScreen = () => {
     //pull to refresh
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchReportsReports();
+        await fetchReports();
         setRefreshing(false);
     };
 
@@ -174,6 +174,8 @@ const InstitutionReportsScreen = () => {
                     )
 
                 )}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => {
 
@@ -215,7 +217,7 @@ const InstitutionReportsScreen = () => {
                                             borderRadius: 2,
                                         }} />
                                     </View>
-                                    
+
                                 </View>
 
                                 <Text style={styles.address}>
@@ -226,9 +228,6 @@ const InstitutionReportsScreen = () => {
                         </Card>
                     )
                 }}
-                refreshControl={ // ← lehúzásra frissítés
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#009688']} />
-                }
             />
 
 

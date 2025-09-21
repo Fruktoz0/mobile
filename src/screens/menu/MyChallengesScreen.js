@@ -92,7 +92,7 @@ const MyChallengesScreen = () => {
                   </Text>
                 </View>
 
-                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.title}>{item.challenge.title}</Text>
 
                 <View style={styles.descRow}>
                   <Text style={styles.description} numberOfLines={2}>
@@ -185,9 +185,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    marginBottom: 6,
     color: '#333',
-    textTransform: 'uppercase',
   },
   descRow: {
     flexDirection: 'row',

@@ -23,7 +23,9 @@ import NewChallengeScreen from '../screens/NewChallangeScreen'
 import ChallengeSubmitScreen from '../screens/ChallangeSubmitScreen'
 import ReportSuccessScreen from '../screens/ReportSuccessScreen'
 import usePushNotifications from '../hooks/usePushNotifications'
-
+import InstitutionChallengesScreen from '../screens/menu/InstitutionChallengesScreen'
+import InstitutionSubmissionsScreen from '../screens/menu/InstitutionSubmissionsScreen'
+import ChallengeAssessmentScreen from '../screens/menu/ChallengeAssessmentScreen'
 
 
 const Stack = createStackNavigator()
@@ -48,6 +50,8 @@ const RootNavigator = () => {
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="MyReports" component={MyReportsScreen} />
                 <Stack.Screen name="InstitutionReports" component={InstitutionReportsScreen} />
+                <Stack.Screen name="InstitutionChallenges" component={InstitutionChallengesScreen} />
+                <Stack.Screen name="InstitutionSubmissions" component={InstitutionSubmissionsScreen} />
                 <Stack.Screen name="MyBadges" component={BadgesScreen} />
                 <Stack.Screen name="MyChallenges" component={MyChallengesScreen} />
                 <Stack.Screen name="FAQ" component={FaqScreen} />
@@ -61,6 +65,7 @@ const RootNavigator = () => {
                 <Stack.Screen name="Challenges" component={ChallengesScreen} />
                 <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} />
                 <Stack.Screen name="ChallengeSubmit" component={ChallengeSubmitScreen} />
+                <Stack.Screen name="ChallengeAssessment" component={ChallengeAssessmentScreen} />
                 {/* Bejelentések */}
                 <Stack.Screen name="ReportSuccess" component={ReportSuccessScreen} />
                 {/* Profil oldalak */}

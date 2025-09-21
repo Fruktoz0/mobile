@@ -92,3 +92,69 @@ export const getMyChallenges = async () => {
         throw new Error(getErrorMessage(err))
     }
 }
+
+//Felhasználó teljesített kihívásának beküldése
+export const submitChallenge = async (challengeId, formData) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.post(`${API_URL}/api/challenges/${challengeId}/submit`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data"
+            }
+        })
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Kihívás lekérdezése id alapján
+export const getChallengeById = async (challengeId) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/challenges/${challengeId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Adott intézményhez tartozó kihívások lekérdezése
+export const getAssignedChallenges = async () => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/challenges/assigned-challenges`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}
+
+//Intézményhez tarotzó összes beküldött kihívás listázása(bármilyen státuszban)
+export const getInstitutionSubmissions = async () => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.get(`${API_URL}/api/challenges/institution-submissions`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}
