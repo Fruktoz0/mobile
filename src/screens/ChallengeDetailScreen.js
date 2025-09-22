@@ -108,13 +108,13 @@ const ChallengeDetailsScreen = () => {
                 {new Date(challenge.startDate).toISOString().split("T")[0]}
               </Text>
             </View>
-            <View style={styles.metaItem}>
-              <MaterialCommunityIcons name="clock-outline" size={16} color="#777" />
-              <Text style={styles.meta}>{remainingTime}</Text>
-            </View>
+            {status !== "approved" && (
+              <View style={styles.metaItem}>
+                <MaterialCommunityIcons name="clock-outline" size={16} color="#777" />
+                <Text style={styles.meta}>{remainingTime}</Text>
+              </View>
+            )}
           </View>
-
-
           <View style={styles.infoBox}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={styles.infoTitle}>Hogyan működik?</Text>
@@ -153,6 +153,19 @@ const ChallengeDetailsScreen = () => {
                 {statusButtonLabels[status] || "Készre jelentés"}
               </Button>
             )
+          )}
+          {status === "approved" && (
+            <View>
+              <Text style={{ alignSelf: "center", fontSize: 30, color: "#388E3C" }}>
+                Jóváhagyva
+              </Text>
+              <Text style={{ alignSelf: "center", fontSize: 14, marginTop: 15, color: "#388E3C" }}>
+                Kapott pontok: {userChallenge.pointsEarned}
+              </Text>
+              <Text style={{ position: "absolute", bottom: -60, fontSize: 12 }}>Jóváhagyás időpontja: {" "}
+                {new Date(userChallenge.approvedAt).toLocaleDateString("hu-HU")}
+              </Text>
+            </View>
 
           )}
 

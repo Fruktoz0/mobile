@@ -7,30 +7,32 @@ import { useState, useEffect } from "react"
 import { fetchUserData } from '../../hooks/fetchUserData';
 import { Share2, Settings, User, Info, LogOut, Lock, RefreshCcw } from 'lucide-react-native';
 import { changeAvatar } from '../../services/profileService';
-
-
+import { getMyChallenges } from '../../services/challengeService';
 
 
 const ProfilScreen = () => {
 
   const navigation = useNavigation()
   const [userData, setUserData] = useState(null)
+  const [challengeLength, setChallengeLength] = useState(0)
+
+  const loadMyChallenges = async () => {
+    const data = await getMyChallenges()
+    setChallengeLength(data.length)
+  }
 
   useEffect(() => {
+    loadMyChallenges()
     fetchUserData(setUserData)
   }, []);
 
   return (
     <ScrollView style={styles.container}>
-
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.backText}>Profilom</Text>
-        <TouchableOpacity>
-          <Share2 size={18} style={{ marginLeft: 8, marginRight: 16 }} />
-        </TouchableOpacity>
       </View>
 
       {userData && (
@@ -88,27 +90,19 @@ const ProfilScreen = () => {
           <View>
             <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between', paddingHorizontal: 26, marginBottom: 3 }}>
               <Text style={{ fontSize: 16, fontWeight: 'bold', paddingStart: 12 }}>{userData.reportCount} </Text>
-              <Text style={{ fontSize: 16, fontWeight: 'bold', paddingStart: 50 }}>0/5 </Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', paddingStart: 50 }}>
+                {challengeLength}
+              </Text>
               <Text style={{ fontSize: 16, fontWeight: 'bold', marginStart: 30 }}>{userData.points} </Text>
             </View>
             <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between', paddingHorizontal: 16, marginBottom: 46 }}>
               <Text style={{ fontSize: 12, color: 'grey' }}>Bejelentések</Text>
-              <Text style={{ fontSize: 12, color: 'grey' }}>Kihívások</Text>
-              <Text style={{ fontSize: 12, color: 'grey' }}>Pontok</Text>
+              <Text style={{ fontSize: 12, color: 'grey' }}>Feloldott kihívások</Text>
+              <Text style={{ fontSize: 12, color: 'grey', paddingEnd: 5 }}>Pontok</Text>
             </View>
           </View>
           <View style={styles.dataContainer}>
             <List.Section>
-              <List.Item style={styles.item} title="Beállítások" left={() => (
-                <View style={{
-                  backgroundColor: "#f5f5f5",
-                  borderRadius: 12,
-                  padding: 8,
-                }}>
-                  <Settings size={20} />
-                </View>
-              )} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Settings')} />
-
               <List.Item style={styles.item} title="Felhasználói adatok" left={() => (
                 <View style={{
                   backgroundColor: "#f5f5f5",
@@ -119,6 +113,8 @@ const ProfilScreen = () => {
                 </View>
               )} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Userdata')} />
               <Divider style={{ marginVertical: 16 }} />
+              {/* Megvalósításra vár*/}
+              {/*  
               <List.Item style={styles.item} title="Információk" left={() => (
                 <View style={{
                   backgroundColor: "#f5f5f5",
@@ -127,7 +123,9 @@ const ProfilScreen = () => {
                 }}>
                   <Info size={20} />
                 </View>
-              )} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Information')} />
+              )} right={props => <List.Icon {...props} icon="chevron-right" />} onPress={() => navigation.navigate('Information')} />  
+               */}
+
               <List.Item style={styles.item} title="Kijelentkezés" left={() => (
                 <View style={{
                   backgroundColor: "#f5f5f5",
@@ -174,6 +172,7 @@ const styles = StyleSheet.create({
   backText: {
     flex: 1,
     textAlign: 'center',
+    paddingEnd: 32,
     fontSize: 16,
     color: 'black',
   },

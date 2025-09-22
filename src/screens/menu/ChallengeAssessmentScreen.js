@@ -1,18 +1,18 @@
 import { StyleSheet, View, Text, ImageBackground, ScrollView, Image, Dimensions, } from "react-native";
 import { useRoute, useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback } from "react";
-import { Button } from "react-native-paper";
-import { Info, CircleCheckBig } from 'lucide-react-native';
+import { Button, HelperText } from "react-native-paper";
+import { Info, CircleCheckBig, } from 'lucide-react-native';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import moment from "moment";
 import { API_URL } from "../../config/apiConfig";
-import { getChallengeById } from "../../services/challengeService";
+import { challengeJudgment, getChallengeById } from "../../services/challengeService";
 import { getUserProfile } from "../../services/profileService";
 import Carousel from 'react-native-reanimated-carousel';
 
+
 const ChallengeAssessment = () => {
     const route = useRoute();
-    const navigation = useNavigation();
     const { userChallenge } = route.params;
     const challengeId = userChallenge.challengeId
     const status = userChallenge.status
@@ -21,7 +21,9 @@ const ChallengeAssessment = () => {
     const [user, setUser] = useState(null)
     const { width } = Dimensions.get('window');
     const [activeIndex, setActiveIndex] = useState(0);
+    const [error, setError] = useState("")
 
+    const navigation = useNavigation()
 
 
     const images = [userChallenge.image1, userChallenge.image2, userChallenge.image3].filter(Boolean)
@@ -35,8 +37,8 @@ const ChallengeAssessment = () => {
     };
 
     //Tiltás admin és intézménynek a saját intézményi kihívásaihoz
-    const canSubmit = user && challenge && (
-        user.role === "admin" && (user.role === "institution" && user.institutionId === challenge.institutionId)
+    const canSubmit = user && challenge && userChallenge.status === "pending" && (
+        user.role === "admin" || (user.role === "institution" && user.institutionId === challenge.institutionId)
     )
 
     const loadChallengeDetails = async () => {
@@ -59,6 +61,26 @@ const ChallengeAssessment = () => {
             loadUser()
         }, [challengeId])
     )
+
+    const onApprove = async () => {
+        setError("")
+        try {
+            await challengeJudgment(userChallenge.id, 'approved')
+            navigation.goBack()
+        } catch (err) {
+            setError(err)
+        }
+    }
+
+    const onReject = async () => {
+        setError("")
+        try {
+            await challengeJudgment(userChallenge.id, 'rejected')
+            navigation.goBack()
+        } catch (err) {
+            setError(err)
+        }
+    }
 
     useFocusEffect(
         useCallback(() => {
@@ -83,8 +105,6 @@ const ChallengeAssessment = () => {
             </View>
         )
     }
-    console.log(status)
-    console.log("userChallenge:", userChallenge);
     return (
         <ImageBackground
             source={{ uri: `${API_URL}${images}` }}
@@ -167,27 +187,39 @@ const ChallengeAssessment = () => {
                             ))}
                         </View>
                     </View>
+                    {(userChallenge.submittedAt ? (
+                        <View style={styles.taskBox}>
+                            <Text style={styles.taskTitle}>Beküldő felhasználó üzenete:</Text>
+                            <Text style={styles.taskText}>{userChallenge.description}</Text>
+                        </View>
 
-                    <View style={styles.taskBox}>
-                        <Text style={styles.taskTitle}>Beküldő felhasználó üzenete:</Text>
-                        <Text style={styles.taskText}>{userChallenge.description}</Text>
-                    </View>
-
+                    ) : (
+                        <Text style={{ textAlign: "center" }}>Még nem került beküldésre</Text>
+                    ))
+                    }
+                    <HelperText type="error" visible={!!error} style={{ textAlign: "center", marginTop: 8, marginBottom: 4 }}>{error}</HelperText>
                     {canSubmit && (
-
                         (
-                            <Button
-                                mode="contained"
-                                style={styles.submitButton}
-                                textColor="#fff"
-                                theme={{ colors: { primary: "#4A90E2" } }}
-                                disabled={status !== "unlocked"}
-                                onPress={() =>
-                                    navigation.navigate("ChallengeSubmit", { challengeId: challenge.id })
-                                }
-                            >
-                                {"Készre jelentés"}
-                            </Button>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 40 }}>
+                                <Button
+                                    mode="contained"
+                                    style={styles.submitButton}
+                                    textColor="#fff"
+                                    theme={{ colors: { primary: "#E57373" } }}
+                                    onPress={onReject}
+                                >
+                                    {"Elutasítás"}
+                                </Button>
+                                <Button
+                                    mode="contained"
+                                    style={styles.submitButton}
+                                    textColor="#fff"
+                                    theme={{ colors: { primary: "#4A90E2" } }}
+                                    onPress={onApprove}
+                                >
+                                    {"Elfogadás"}
+                                </Button>
+                            </View>
                         )
 
                     )}
@@ -220,13 +252,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.15,
         shadowRadius: 8,
         elevation: 6,
-        height: "80%",
+        height: "90%",
         position: "relative",
     },
 
     badgeWrapper: {
         position: "absolute",
-        top: -14, // picit kilógjon a kártya tetején
+        top: -14,
         alignSelf: "center",
         zIndex: 10,
     },
@@ -285,6 +317,7 @@ const styles = StyleSheet.create({
     taskTitle: {
         fontWeight: "bold",
         fontSize: 16,
+        marginTop: 12,
         marginBottom: 6,
     },
     taskText: {
@@ -296,7 +329,6 @@ const styles = StyleSheet.create({
     submitButton: {
         marginTop: 10,
         borderRadius: 10,
-        paddingVertical: 6,
     },
     expiredText: {
         textAlign: "center",

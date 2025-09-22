@@ -116,6 +116,29 @@ const InstitutionChallengesScreen = () => {
                             }
                             contentStyle={{ backgroundColor: '#FFFFFf', elevation: 2, borderRadius: 8, shadowColor: "transparent", }}
                         >
+                            {/* Összes opció */}
+                            <Menu.Item
+                                key="all"
+                                onPress={() => {
+                                    setSelectedStatus(null);
+                                    setMenuVisible(false);
+                                }}
+                                title="Összes"
+                                titleStyle={{
+                                    fontSize: 14,
+                                    color: "#000",
+                                }}
+                                leadingIcon={selectedStatus === null
+                                    ? (props) => (
+                                        <MaterialCommunityIcons
+                                            name="check"
+                                            size={18}
+                                            color="black"
+                                        />
+                                    )
+                                    : undefined
+                                }
+                            />
 
                             {Object.keys(statusMap).map(status => (
                                 <Menu.Item
@@ -148,7 +171,7 @@ const InstitutionChallengesScreen = () => {
 
             <FlatList
                 data={challenges.filter(challenges =>
-                    (!selectedStatus || challenges.status === setSelectedStatus) &&
+                    (!selectedStatus || challenges.status === selectedStatus) &&
                     (
                         challenges.title.toLowerCase().includes(searchText.toLowerCase()) ||
                         challenges.description.toLowerCase().includes(searchText.toLowerCase())
@@ -183,10 +206,10 @@ const InstitutionChallengesScreen = () => {
                             <View style={styles.cardContent}>
                                 <View style={styles.dateRow}>
                                     <Text style={styles.dateText}>
-                                        Start: {new Date(item.startDate).toLocaleDateString()}
+                                        Kezdés: {new Date(item.startDate).toLocaleDateString()}
                                     </Text>
                                     <Text style={styles.dateText}>
-                                        End: {new Date(item.endDate).toLocaleDateString()}
+                                        Lejárat: {new Date(item.endDate).toLocaleDateString()}
                                     </Text>
                                 </View>
 
@@ -201,6 +224,10 @@ const InstitutionChallengesScreen = () => {
                                         <Text style={styles.rewardText}>+{item.rewardPoints}p</Text>
                                     </View>
                                 </View>
+                                <Text style={{ color: statusMap[item.status]?.color, paddingTop: 8, paddingStart: 8 }}>
+
+                                    {statusMap[item.status]?.label || item.status}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     )
@@ -229,7 +256,7 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     header: {
-        marginTop: 8,
+        marginTop: 30,
         marginBottom: 20,
         paddingHorizontal: 10,
     },

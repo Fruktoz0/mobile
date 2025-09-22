@@ -1,13 +1,14 @@
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Alert } from 'react-native'
-import { useState, useEffect, } from 'react'
-import { Plus, Star, Lock } from 'lucide-react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
+import { useState } from 'react'
+import { IconButton, Menu } from 'react-native-paper';
+import { Star } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
 import { API_URL } from '../../config/apiConfig'
 import { getMyChallenges } from '../../services/challengeService'
 import { getUserProfile } from '../../services/profileService';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 
 const MyChallengesScreen = () => {
@@ -15,6 +16,9 @@ const MyChallengesScreen = () => {
   const [challenges, setChallenges] = useState([])
   const [loadingChallenges, setLoadingChallenges] = useState(false)
   const [user, setUser] = useState(null);
+  const [searchText, setSearchText] = useState('')
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
   const navigation = useNavigation();
 
@@ -22,6 +26,14 @@ const MyChallengesScreen = () => {
   const loadUser = async () => {
     const user = await getUserProfile()
     setUser(user);
+  };
+
+  const statusMap = {
+    expired: { label: "Lejárt", color: "#6B7280", },
+    unlocked: { label: "Feloldva", color: "#1976D2", },
+    approved: { label: "Jóváhagyott", color: "#388E3C", },
+    pending: { label: "Jóváhagyásra vár", color: "#F57C00", },
+    rejected: { label: "Elutasítva", color: "#D32F2f", }
   };
 
   const loadChallenges = async () => {
@@ -54,8 +66,112 @@ const MyChallengesScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
+            <Text style={styles.backText}>Intézmény feloldott kihívásai</Text>
+          </TouchableOpacity>
+        </View>
+
+
+        {/* Kereső */}
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: "#fff",
+          borderRadius: 8,
+          height: 40,
+          paddingHorizontal: 10,
+        }}>
+          <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+          <TextInput
+            style={{
+              flex: 1,
+              fontSize: 14,
+              marginLeft: 8,
+              textAlignVertical: "center",
+            }}
+            placeholder="Keresés..."
+            placeholderTextColor="#aaa"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <TouchableOpacity>
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <IconButton
+                  icon="tune"
+                  size={22}
+                  onPress={() => setMenuVisible(true)}
+                />
+              }
+              contentStyle={{ backgroundColor: '#FFFFFf', elevation: 2, borderRadius: 8, shadowColor: "transparent", }}
+            >
+
+              {/* Összes opció */}
+              <Menu.Item
+                key="all"
+                onPress={() => {
+                  setSelectedStatus(null);
+                  setMenuVisible(false);
+                }}
+                title="Összes"
+                titleStyle={{
+                  fontSize: 14,
+                  color: "#000",
+                }}
+                leadingIcon={selectedStatus === null
+                  ? (props) => (
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={18}
+                      color="black"
+                    />
+                  )
+                  : undefined
+                }
+              />
+
+              {Object.keys(statusMap).map(status => (
+                <Menu.Item
+                  key={status}
+                  onPress={() => {
+                    setSelectedStatus(status);
+                    setMenuVisible(false);
+                  }}
+                  title={statusMap[status].label}
+                  titleStyle={{
+                    fontSize: 14,
+                    color: statusMap[status].color,
+                  }}
+                  leadingIcon={selectedStatus === status
+                    ? (props) => (
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={18}
+                        color="black"
+                      />
+                    )
+                    : undefined
+                  }
+                />
+              ))}
+            </Menu>
+          </TouchableOpacity>
+        </View>
+      </View>
       <FlatList
-        data={challenges}
+        data={challenges.filter(item =>
+          (!selectedStatus || item.status === selectedStatus) &&
+          (
+            item.challenge.title.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.challenge.description.toLowerCase().includes(searchText.toLowerCase())
+          )
+
+        )}
         keyExtractor={(item) => item.id.toString()}
         refreshing={loadingChallenges}
         onRefresh={loadChallenges}
@@ -125,7 +241,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9F9F9',
     padding: 10,
-    marginTop: 40,
+  },
+  header: {
+    marginTop: 30,
+    marginBottom: 30,
+    paddingHorizontal: 10,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10, // hogy legyen hely a kereső alatt
+  },
+  backText: {
+    fontSize: 16,
+    marginLeft: 4,
+    color: 'black',
+    flex: 1,
+    textAlign: 'center',
+    marginLeft: 0,
+    marginBottom: 12,
   },
   card: {
     backgroundColor: '#fff',

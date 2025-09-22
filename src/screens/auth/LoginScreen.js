@@ -1,9 +1,10 @@
-import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
-import { TextInput, Button, Text } from 'react-native-paper';
+import { StyleSheet, View, Image, TouchableOpacity} from 'react-native'
+import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 import { login } from '../../services/authService';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -12,6 +13,7 @@ const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
+    const [errorMessage, setErrorMessage] = useState('')
 
     const handleLogin = async () => {
         try {
@@ -21,52 +23,58 @@ const LoginScreen = () => {
             }
         } catch (error) {
             console.error('Bejelentkezési hiba:', error);
-            if (error.response) {
-                Alert.alert(error.response?.data?.message || 'Ismeretlen hiba történt.');
-            }
+            setErrorMessage(error.message)
         }
     }
-
     return (
-        <View style={styles.container}>
-            <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
-            <Text style={styles.title}>BEJELENTKEZÉS</Text>
+        <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            extraScrollHeight={20}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
+            <View style={styles.container}>
+                <Image source={require('../../../assets/images/tisztavaros_logo.png')} style={styles.logo} />
+                <Text style={styles.title}>BEJELENTKEZÉS</Text>
 
-            <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-            <TextInput
-                label="Jelszó"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
+                <TextInput
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+                <TextInput
+                    label="Jelszó"
+                    value={password}
+                    onChangeText={setPassword}
+                    mode="outlined"
+                    secureTextEntry
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+                {errorMessage ? (
+                    <HelperText type="error" visible={true}>
+                        {errorMessage}
+                    </HelperText>
+                ) : null}
 
-            <Button
-                mode="contained"
-                onPress={handleLogin}
-                style={styles.button}
-            >
-                BEJELENTKEZÉS
-            </Button>
-            <View style={styles.divider} />
+                <Button
+                    mode="contained"
+                    onPress={handleLogin}
+                    style={styles.button}
+                >
+                    BEJELENTKEZÉS
+                </Button>
+                <View style={styles.divider} />
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
+                </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity style={styles.googleButton}>
-                <Image source={require('../../../assets/images/google.svg')} style={styles.googleIcon} />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.link}>Nincs fiókod? <Text style={styles.linkHighlight}>Regisztrálj</Text></Text>
-            </TouchableOpacity>
-        </View>
+        </KeyboardAwareScrollView>
 
     )
 }
@@ -106,7 +114,7 @@ const styles = StyleSheet.create({
         height: 1,
         opacity: 0.4,
         backgroundColor: '#6FB1A5',
-        marginVertical: 40,
+        marginTop: 30,
         marginHorizontal: 125,
     },
     button: {
@@ -115,14 +123,6 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center',
         borderRadius: 8,
-    },
-    googleButton: {
-        alignItems: 'center',
-        marginBottom: 16
-    },
-    googleIcon: {
-        width: 30,
-        height: 30,
     },
     link: {
         marginTop: 16,

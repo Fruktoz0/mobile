@@ -108,21 +108,23 @@ const FaqScreen = () => {
 export default FaqScreen
 
 const styles = StyleSheet.create({
+header: {
+    marginTop: 40,
+    paddingHorizontal: 10,
+  },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   backText: {
     fontSize: 16,
+    marginLeft: 4,
+    paddingEnd: 16,
     color: 'black',
-    marginLeft: 8,
-  },
-  header: {
-    marginStart: 16,
-    paddingTop: 32,
-    paddingBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    textAlign: 'center',
+    marginLeft: 0,
+    marginBottom: 12,
   },
   container: {
     flex: 1,

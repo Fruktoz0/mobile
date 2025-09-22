@@ -1,5 +1,5 @@
 import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native'
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react'
 import { Dimensions } from 'react-native';
@@ -14,6 +14,7 @@ const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState("")
   const navigation = useNavigation();
 
   const handleRegister = async () => {
@@ -27,9 +28,7 @@ const RegisterScreen = () => {
 
     } catch (error) {
       console.error('Regisztrációs hiba:', error.message);
-      if (error.response) {
-        Alert.alert(error.response?.data?.message || 'Ismeretlen hiba történt.');
-      }
+      setErrorMessage(error.message)
     }
   }
 
@@ -80,6 +79,11 @@ const RegisterScreen = () => {
           theme={{ colors: { primary: '#6db2a1' } }}
           style={styles.input}
         />
+        {errorMessage ? (
+          <HelperText type="error" visible={true}>
+            {errorMessage}
+          </HelperText>
+        ) : null}
 
         <Button mode="contained" onPress={handleRegister} style={styles.button}>
           REGISZTRÁCIÓ

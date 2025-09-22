@@ -133,7 +133,7 @@ function UserdataScreen() {
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
                   <TextInput
                     label="Irányítószám"
-                    value={String(formData.zipCode)}
+                    value={formData.zipCode}
                     onChangeText={(text) => setFormData({ ...formData, zipCode: text })}
                     mode="outlined"
                     outlineColor="rgba(107, 174, 161, 0.3)"

@@ -8,7 +8,6 @@ import { getUserProfile } from '../../services/profileService'
 import { useCallback } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { IconButton, Menu } from 'react-native-paper';
-import { CircleAlert } from 'lucide-react-native';
 
 const InstitutionSubmissionsScreen = () => {
     const [challenges, setChallenges] = useState([])
@@ -64,9 +63,6 @@ const InstitutionSubmissionsScreen = () => {
             Alert.alert("Bejelentkezés szükséges", "Kérlek jelentkezz be a kihívás megnyitásához.")
             return
         }
-
-
-
         navigation.navigate('ChallengeAssessment', { userChallenge: item })
     }
 
@@ -247,7 +243,7 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     header: {
-        marginTop: 8,
+        marginTop: 30,
         marginBottom: 30,
         paddingHorizontal: 10,
     },

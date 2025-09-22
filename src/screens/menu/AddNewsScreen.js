@@ -7,7 +7,7 @@ import { pickImage } from '../../services/reportService';
 import { getAllInstitutions } from '../../services/homeService';
 import { addNews } from '../../services/homeService';
 import { getCurrentUser } from '../../services/authService';
-import { KeyboardProvider } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -82,7 +82,13 @@ const AddNewsScreen = ({ navigation }) => {
         );
 
     return (
-        <KeyboardProvider>
+        <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            extraScrollHeight={20}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
             <ScrollView style={styles.container}>
                 <View style={styles.imageContainer}>
                     <Image
@@ -188,7 +194,8 @@ const AddNewsScreen = ({ navigation }) => {
                     </Button>
                 </View>
             </ScrollView>
-        </KeyboardProvider>
+        </KeyboardAwareScrollView>
+
     );
 };
 

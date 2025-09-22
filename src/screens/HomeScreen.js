@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList, Image } from 'react-native'
-import { Filter, Share2, Plus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { getAllNews, getAllInstitutions } from '../services/homeService';
 import { useNavigation } from '@react-navigation/native'
@@ -8,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import { registerForPushNotificationsAsync } from "../services/notificationService";
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
+import { API_URL } from '../config/apiConfig';
 
 
 const HomeScreen = () => {
@@ -20,12 +21,9 @@ const HomeScreen = () => {
   const [loadingInst, setLoadingInst] = useState(false);
   const [user, setUser] = useState(null);
 
-
-
   //Felhasználó lekérése
   const loadUser = async () => {
     const token = await AsyncStorage.getItem('token');
-    console.log("Token a HomeScreen-ben:", token);
     if (token) {
       const decoded = jwtDecode(token);
       setUser(decoded);
@@ -37,10 +35,8 @@ const HomeScreen = () => {
     setLoadingNews(true);
     try {
       const newsData = await getAllNews();
-      console.log("Betöltött hírek:", newsData);
       setNews(newsData);
     } catch (err) {
-      console.log("Hírek betöltése sikertelen:", err);
     } finally {
       setLoadingNews(false);
     }
@@ -63,7 +59,6 @@ const HomeScreen = () => {
     loadNews();
     loadInstitutions();
   }, []);
-
 
   // Felhasználó változására regisztráció a push értesítésekre
   useEffect(() => {
@@ -100,22 +95,14 @@ const HomeScreen = () => {
 
 
   return (
-
     <View style={styles.container}>
-      {/* fejléc */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Image source={require('../../assets/images/logo.png')} style={styles.headerLogo} />
           <Text style={styles.headerTitle}>Hírek és információk</Text>
         </View>
 
-        {/* intézmény csík + szűrő */}
         <View style={styles.stripRow}>
-          <View>
-            <TouchableOpacity onPress={() => console.log('Open filter')} style={styles.filterBtn}>
-              <Filter size={20} />
-            </TouchableOpacity>
-          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stripContent}>
             {institutions.map(inst => {
               const active = activeInst === inst.id;
@@ -133,8 +120,6 @@ const HomeScreen = () => {
         </View>
       </View>
 
-
-      {/* lista */}
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
@@ -145,31 +130,35 @@ const HomeScreen = () => {
           const inst = institutions.find(i => i.id === item.institutionId);
 
           return (
-            <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={() => navigation.navigate('NewsDetails', { id: item.id })}>
-              <View style={styles.logoWrap}>
-                {inst?.logo ? (
-                  <Image source={{ uri: inst.logo }} style={styles.logo} />
-                ) : (
-                  <View style={styles.logoPlaceholder}>
-                    <Text style={styles.logoPlaceholderText}>TV</Text>
-                  </View>
-                )}
+            <TouchableOpacity style={styles.card} activeOpacity={0.8}
+              onPress={() => navigation.navigate('NewsDetails', { id: item.id })}>
+
+              <View style={styles.cardHeader}>
+                <View style={styles.logoWrap}>
+                  <Image source={{ uri: inst.logoUrl }} style={styles.logo} />
+                </View>
+                <Text style={styles.cardInst}>{inst?.name ?? "Intézmény"}</Text>
               </View>
-
-              <View style={styles.cardBody}>
-                <Text numberOfLines={1} style={styles.cardInst}>{inst?.name ?? "Intézmény"}</Text>
-                <Text numberOfLines={1} style={styles.cardTitle}>{item.title}</Text>
-                <Text numberOfLines={2} style={styles.cardExcerpt}>{item.excerpt}</Text>
-
-                <View style={styles.cardFooter}>
-                  <Text style={styles.cardDate}>{item.date}</Text>
+              <View style={styles.cardContent}>             
+                {item.imageUrl && (
+                  <Image source={{ uri: `${API_URL}/${item.imageUrl}` }} style={styles.newsImage} />
+                )}
+                <View style={styles.textBlock}>
+                  <Text numberOfLines={2} style={styles.cardTitle}>{item.title}</Text>
+                  <Text numberOfLines={2} style={styles.cardExcerpt}>{item.content}</Text>
                 </View>
               </View>
 
-              <View style={styles.cardActions}>
-                <TouchableOpacity onPress={() => console.log("Share", item.id)} style={styles.iconBtn}>
-                  <Share2 size={18} />
-                </TouchableOpacity>
+              <View style={styles.cardFooter}>
+                <Text style={styles.cardDate}>
+                  {new Date(item.createdAt).toLocaleString("hu-HU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })}
+                </Text>
               </View>
             </TouchableOpacity>
           );
@@ -185,10 +174,8 @@ const HomeScreen = () => {
         </TouchableOpacity>
       )}
     </View>
-
   );
 }
-
 
 export default HomeScreen
 
@@ -197,7 +184,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7F7F7"
   },
-
   header: {
     backgroundColor: "#FFFFFF",
     paddingTop: 14,
@@ -208,7 +194,6 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 22,
     fontWeight: "500",
-
   },
   headerRow: {
     marginTop: 20,
@@ -225,128 +210,114 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 10,
   },
-
   headerLogo: {
     width: 40,
     height: 40,
     marginRight: 8,
     borderRadius: 8,
   },
-
   stripRow: {
     marginTop: 12,
+    marginBottom: 8,
     flexDirection: "row",
     alignItems: "center"
   },
-
   stripContent: {
     paddingRight: 44,
     gap: 8
   },
-
   stripItem: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
     backgroundColor: "#f6f7f7",
   },
-
   stripItemActive: {
     backgroundColor: "#dff1ed"
   },
-
   stripText: {
     color: "black",
     fontWeight: "400"
   },
-
   stripTextActive: {
     color: "#0E7E7E"
   },
-
   filterBtn: {
     marginRight: 8,
   },
-
   listContent: {
     paddingTop: 10,
     paddingBottom: 24
   },
-
   card: {
-    flexDirection: "row",
     backgroundColor: "white",
-    borderRadius: 3,
-    padding: 15,
-    alignItems: "center",
-    marginBottom: 5,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
-
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
   },
   logoWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
-    overflow: "hidden"
-  },
-
-  logo: {
-    width: "100%",
-    height: "100%"
-  },
-
-  logoPlaceholder: {
-    flex: 1,
-    backgroundColor: "#E6F2F0",
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    justifyContent: "center",
     alignItems: "center",
+    marginRight: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+  logo: {
+    width: "80%",
+    height: "80%",
+    resizeMode: "contain",
+  },
+  cardContent: {
+    flexDirection: "row",   
+    alignItems: "flex-start",
+    marginTop: 8,
+  },
+  newsImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+    resizeMode: "cover",
+  },
+  textBlock: {
+    flex: 1,
     justifyContent: "center",
   },
-  logoPlaceholderText: { color: "#0E7E7E", fontWeight: "700" },
-
-  cardBody: {
-    flex: 1
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
   },
-
-  cardInst: {
+  cardExcerpt: {
+    fontSize: 13,
     color: "#4B5563",
-    fontSize: 12,
-    marginBottom: 2
   },
-
-  cardTitle: { fontSize: 16, fontWeight: "700", color: "#111827" },
-
-  cardExcerpt: { fontSize: 13, color: "#4B5563", marginTop: 4 },
-
   cardFooter: {
     marginTop: 8,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
   },
-
   cardDate: {
-    color: "#6B7280",
-    fontSize: 12
-  },
-
-  statusText: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#0E7E7E"
-  },
-
-  cardActions: {
-    height: 120,
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  iconBtn: {
-    padding: 6,
-    borderRadius: 8,
+    color: "#9CA3AF",
   },
   fab: {
     position: "absolute",
@@ -358,11 +329,10 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4, // Android shadow
-    shadowColor: "#000", // iOS shadow
+    elevation: 4,
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-
-})
+});

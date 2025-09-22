@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native'
-import { Card, IconButton, Searchbar } from 'react-native-paper'
+import { StyleSheet, Text, View, FlatList, RefreshControl, TextInput, TouchableOpacity } from 'react-native'
+import { Card, IconButton, Searchbar, Menu } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { Image } from 'react-native'
@@ -10,12 +10,15 @@ import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import { fetchAllReports } from '../services/reportService'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 
 const ReportsScreen = () => {
   const navigation = useNavigation()
   const [reports, setReports] = useState([])
   const [searchText, setSearchText] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [userId, setUserId] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // pull to refresh állapot
 
@@ -27,6 +30,16 @@ const ReportsScreen = () => {
       console.error("Hiba a bejelentések betöltésekor:", error);
     }
   }
+
+  const statusMap = {
+    open: { label: "Nyitott", color: "#6B7280" },
+    accepted: { label: "Befogadva", color: "#1976D2" },
+    in_progress: { label: "Folyamatban", color: "#8E24AA" },
+    forwarded: { label: "Továbbítva", color: "#64B5F6" },
+    resolved: { label: "Megoldva", color: "#388E3C" },
+    reopened: { label: "Újranyitva", color: "#F57C00" },
+    rejected: { label: "Elutasítva", color: "#D32F2f" }
+  };
 
   //Ha képernyőre fokusz kerül frissít
   useFocusEffect(
@@ -105,22 +118,103 @@ const ReportsScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.searchWrapper}>
-          <Searchbar
-            placeholder="Keresés"
-            onChangeText={setSearchText}
+        {/* Kereső */}
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: "#fff",
+          borderRadius: 8,
+          height: 40,
+          paddingHorizontal: 10,
+        }}>
+          <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+          <TextInput
+            style={{
+              flex: 1,
+              fontSize: 14,
+              marginLeft: 8,
+              textAlignVertical: "center",
+            }}
+            placeholder="Keresés..."
+            placeholderTextColor="#aaa"
             value={searchText}
-            style={styles.searchbar}
+            onChangeText={setSearchText}
           />
-          <IconButton icon="tune" size={26} onPress={() => { }} />
+          <TouchableOpacity>
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <IconButton
+                  icon="tune"
+                  size={22}
+                  onPress={() => setMenuVisible(true)}
+                />
+              }
+              contentStyle={{ backgroundColor: '#FFFFFf', elevation: 2, borderRadius: 8, shadowColor: "transparent", }}
+            >
+
+              {/* Összes opció */}
+              <Menu.Item
+                key="all"
+                onPress={() => {
+                  setSelectedStatus(null);
+                  setMenuVisible(false);
+                }}
+                title="Összes"
+                titleStyle={{
+                  fontSize: 14,
+                  color: "#000",
+                }}
+                leadingIcon={selectedStatus === null
+                  ? (props) => (
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={18}
+                      color="black"
+                    />
+                  )
+                  : undefined
+                }
+              />
+
+              {Object.keys(statusMap).map(status => (
+                <Menu.Item
+                  key={status}
+                  onPress={() => {
+                    setSelectedStatus(status);
+                    setMenuVisible(false);
+                  }}
+                  title={statusMap[status].label}
+                  titleStyle={{
+                    fontSize: 14,
+                    color: statusMap[status].color,
+                  }}
+                  leadingIcon={selectedStatus === status
+                    ? (props) => (
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={18}
+                        color="black"
+                      />
+                    )
+                    : undefined
+                  }
+                />
+              ))}
+            </Menu>
+          </TouchableOpacity>
         </View>
       </View>
 
       <FlatList
         style={styles.listContent}
         data={reports.filter(report =>
-          report.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          report.description.toLowerCase().includes(searchText.toLowerCase())
+          (!selectedStatus || report.status === selectedStatus) && (
+            report.title.toLowerCase().includes(searchText.toLowerCase()) ||
+            report.description.toLowerCase().includes(searchText.toLowerCase())
+          )
+
         )}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
@@ -189,26 +283,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAF8',
   },
   header: {
+    marginTop: 40,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 15,
-    padding: 10,
   },
-  searchWrapper: {
-    marginRight: 10,
-    alignItems: 'center',
+  backText: {
+    fontSize: 16,
+    marginLeft: 4,
+    color: 'black',
     flex: 1,
-    flexDirection: 'row',
-  },
-  searchbar: {
-    flex: 1,
-    height: 48,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 5,
-
-  },
-  listContent: {
-
+    textAlign: 'center',
+    marginLeft: 0,
   },
   card: {
     backgroundColor: '#FFFFFF',

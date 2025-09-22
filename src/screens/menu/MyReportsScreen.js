@@ -1,18 +1,10 @@
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ActivityIndicator, FlatList, RefreshControl, Image } from 'react-native'
+import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, FlatList, RefreshControl, Image } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import React, { useState, useEffect } from 'react'
-import { List, Card } from 'react-native-paper';
+import { useState, useEffect } from 'react'
+import { Card } from 'react-native-paper';
 import { API_URL } from '../../config/apiConfig'
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-import {
-  FileWarning,
-  Tag,
-  CircleAlert,
-  MapPin,
-  FileText,
-} from 'lucide-react-native';
 import { fetchUserReports } from '../../services/reportService';
 
 const statusLabels = {
@@ -132,13 +124,13 @@ const MyReportsScreen = () => {
                       </View>
                     </View>
                     <View style={styles.bottomRow}>
-                   
+
                       <Text style={styles.address}>
                         {getDistrictFromZip(item.city, item.zipCode)}
                       </Text>
 
                     </View>
-                      <View style={[styles.statusBar, { backgroundColor: statusColors[item.status] }]} />
+                    <View style={[styles.statusBar, { backgroundColor: statusColors[item.status] }]} />
                   </Card>
                 )
               }}
@@ -261,12 +253,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
-statusBar: {
-  height: 2,
-  width: '100%',
-  borderBottomLeftRadius: 6,
-  borderBottomRightRadius: 6,
-  opacity: 0.7
-},
+  statusBar: {
+    height: 2,
+    width: '100%',
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+    opacity: 0.7
+  },
 
 })

@@ -8,7 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { submitChallenge } from '../services/challengeService';
 import { Dimensions } from "react-native";
-
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 const ChallengeSubmitScreen = () => {
@@ -76,121 +76,129 @@ const ChallengeSubmitScreen = () => {
     }
 
     return (
-        <ScrollView styles={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.backText}>Kihívás teljesítés beküldése</Text>
-            </View>
+        <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            extraScrollHeight={20}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
+            <ScrollView styles={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="chevron-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.backText}>Kihívás teljesítés beküldése</Text>
+                </View>
 
-            <View style={styles.imageContainer}>
-                <Image
-                    source={
-                        images.length > 0
-                            ? { uri: images[selectedImageIndex].uri }
-                            : require("../../assets/images/image_placeholder.png")
-                    }
-                    style={styles.largePreview}
-                    resizeMode="cover"
-                />
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.thumbnailsContainer}
-                >
-                    {images.map((img, idx) => (
-                        <View key={idx} style={styles.thumbnailWrapper}>
-                            <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
-                                <Image
-                                    source={{ uri: img.uri }}
-                                    style={[
-                                        styles.thumbnail,
-                                        idx === selectedImageIndex && styles.selectedThumbnail,
-                                    ]}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.deleteIcon} onPress={() => handleDeleteImage(idx)}>
-                                <X size={16} color="black" strokeWidth={2.5} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>
-
-                {/* Feltöltés*/}
-                {images.length < 3 && (
-                    <Button
-                        mode="outlined"
-                        icon="camera"
-                        onPress={pickImage}
-                        style={styles.imageButton}
-                        textColor="#6BAEA1"
-                        theme={{ colors: { primary: "#6db2a1" } }}
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={
+                            images.length > 0
+                                ? { uri: images[selectedImageIndex].uri }
+                                : require("../../assets/images/image_placeholder.png")
+                        }
+                        style={styles.largePreview}
+                        resizeMode="cover"
+                    />
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.thumbnailsContainer}
                     >
-                        Kép feltöltése (max 3)
-                    </Button>
-                )}
-                <Text style={styles.optionalNote}>
-                    Legalább 1 kép javasolt, max 3 feltölthető
-                </Text>
-            </View>
+                        {images.map((img, idx) => (
+                            <View key={idx} style={styles.thumbnailWrapper}>
+                                <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
+                                    <Image
+                                        source={{ uri: img.uri }}
+                                        style={[
+                                            styles.thumbnail,
+                                            idx === selectedImageIndex && styles.selectedThumbnail,
+                                        ]}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.deleteIcon} onPress={() => handleDeleteImage(idx)}>
+                                    <X size={16} color="black" strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </ScrollView>
 
-            <Divider style={styles.divider} />
-
-            {/* Leírás */}
-            <View style={{ margin: 16 }}>
-                <TextInput
-                    label="Leírás"
-                    value={description}
-                    onChangeText={setDescription}
-                    mode="outlined"
-                    outlineColor="rgba(107, 174, 161, 0.3)"
-                    multiline
-                    style={[styles.inputDescription, { backgroundColor: "#FFFFFF" }]}
-                    theme={{ colors: { primary: "#6db2a1" } }}
-                />
-                <HelperText type="error" visible={!!errorMessage}>
-                    {errorMessage}
-                </HelperText>
-
-                {/* Submit gomb */}
-                <Button
-                    mode="contained"
-                    onPress={handleSubmit}
-                    style={styles.submitButton}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator animating color="#fff" />
-                    ) : (
-                        "Beküldés"
-                    )}
-                </Button>
-            </View>
-
-            <Portal>
-                <Dialog visible={visible} onDismiss={hideDialog}>
-                    <Dialog.Content>
-                        <Text variant="bodyMedium">
-                            Gratulálok, sikeresen beküldted jóváhagyásra a kihívást!
-                        </Text>
-                        <Text style={{ marginTop: 8 }}>
-                            Figyelem, a pontok csak elbírálás után kerülnek jóváhagyásra!
-                        </Text>
-                    </Dialog.Content>
-                    <Dialog.Actions>
+                    {/* Feltöltés*/}
+                    {images.length < 3 && (
                         <Button
-                            onPress={() => {
-                                hideDialog()
-                                navigation.replace("ChallengeDetail", { userChallenge: { challengeId, status: "pending" } })
-                            }}
+                            mode="outlined"
+                            icon="camera"
+                            onPress={pickImage}
+                            style={styles.imageButton}
+                            textColor="#4A90E2"
+                            theme={{ colors: { primary: "#4A90E2" } }}
                         >
-                            Bezár
+                            Kép feltöltése (max 3)
                         </Button>
-                    </Dialog.Actions>
-                </Dialog>
-            </Portal>
-        </ScrollView>
+                    )}
+                    <Text style={styles.optionalNote}>
+                        Legalább 1 kép javasolt, max 3 feltölthető
+                    </Text>
+                </View>
+
+                <Divider style={styles.divider} />
+
+                {/* Leírás */}
+                <View style={{ margin: 16 }}>
+                    <TextInput
+                        label="Leírás"
+                        value={description}
+                        onChangeText={setDescription}
+                        mode="outlined"
+                        outlineColor="rgba(74, 144, 226, 0.3)"
+                        multiline
+                        style={[styles.inputDescription, { backgroundColor: "#FFFFFF" }]}
+                        theme={{ colors: { primary: "#4A90E2" } }}
+                    />
+                    <HelperText type="error" visible={!!errorMessage}>
+                        {errorMessage}
+                    </HelperText>
+
+                    {/* Submit gomb */}
+                    <Button
+                        mode="contained"
+                        onPress={handleSubmit}
+                        style={styles.submitButton}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator animating color="#fff" />
+                        ) : (
+                            "Beküldés"
+                        )}
+                    </Button>
+                </View>
+
+                <Portal>
+                    <Dialog visible={visible} onDismiss={hideDialog}>
+                        <Dialog.Content>
+                            <Text variant="bodyMedium">
+                                Gratulálok, sikeresen beküldted jóváhagyásra a kihívást!
+                            </Text>
+                            <Text style={{ marginTop: 8 }}>
+                                Figyelem, a pontok csak elbírálás után kerülnek jóváhagyásra!
+                            </Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button
+                                onPress={() => {
+                                    hideDialog()
+                                    navigation.replace("ChallengeDetail", { userChallenge: { challengeId, status: "pending" } })
+                                }}
+                            >
+                                Bezár
+                            </Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+            </ScrollView>
+        </KeyboardAwareScrollView>
     );
 };
 
@@ -225,7 +233,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     imageButton: {
-        borderColor: "#6BAEA1",
+        borderColor: "#4A90E2",
         borderWidth: 1.5,
         borderRadius: 8,
         marginTop: 16,
@@ -279,7 +287,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     submitButton: {
-        backgroundColor: "#6db2a1",
+        backgroundColor: "#4A90E2",
         marginTop: 20,
         height: 50,
         justifyContent: "center",

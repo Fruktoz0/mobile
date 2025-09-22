@@ -158,3 +158,19 @@ export const getInstitutionSubmissions = async () => {
         throw new Error(getErrorMessage(err))
     }
 }
+
+//Felhasználó beküldött kihívásának elfogadása, elutasítása
+export const challengeJudgment = async (userChallengeId, decision) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await axios.put(`${API_URL}/api/challenges/${userChallengeId}/approve`, { decision }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data
+    } catch (err) {
+        console.error(getErrorMessage(err))
+        throw new Error(getErrorMessage(err))
+    }
+}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button, TextInput, Divider, ActivityIndicator } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { MapLibreGL } from '../config/mapConfig';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import {
   pickImage,
@@ -84,178 +85,186 @@ const ReportScreen = () => {
   const formValid = isFormValid({ title, description, zipCode, address, city, categoryId, images, location });
 
 
-return (
-  <>
-    <ScrollView style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={
-            images.length > 0
-              ? { uri: images[selectedImageIndex].uri }
-              : require('../../assets/images/image_placeholder.png')
-          }
-          style={styles.largePreview}
-          resizeMode="cover"
-        />
+  return (
+    <>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        extraScrollHeight={20}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ScrollView style={styles.container}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={
+                images.length > 0
+                  ? { uri: images[selectedImageIndex].uri }
+                  : require('../../assets/images/image_placeholder.png')
+              }
+              style={styles.largePreview}
+              resizeMode="cover"
+            />
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.thumbnailsContainer}
-        >
-          {images.map((img, idx) => (
-            <View key={idx} style={styles.thumbnailWrapper}>
-              <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
-                <Image
-                  source={{ uri: img.uri }}
-                  style={[
-                    styles.thumbnail,
-                    idx === selectedImageIndex && styles.selectedThumbnail,
-                  ]}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteIcon}
-                onPress={() => handleDeleteImage(idx)}
-              >
-                <MaterialCommunityIcons name="close-circle" size={20} color="red" />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
-
-        <Button
-          mode="outlined"
-          icon="camera"
-          onPress={() => pickImage(images, setImages)}
-          style={styles.imageButton}
-          textColor="#6BAEA1"
-          theme={{ colors: { primary: '#6db2a1' } }}
-        >
-          Kép feltöltése (max 3)
-        </Button>
-      </View>
-
-      <Divider style={styles.divider} />
-
-      <View style={{ margin: 16 }}>
-        <TextInput
-          label="Bejelentés megnevezése"
-          value={title}
-          onChangeText={setTitle}
-          mode="outlined"
-          outlineColor="rgba(107, 174, 161, 0.3)"
-          style={[styles.input, { backgroundColor: '#FFFFFF' }]}
-          theme={{ colors: { primary: '#6db2a1' } }}
-        />
-
-        <View style={[styles.input, styles.pickerContainer]}>
-          <Picker
-            selectedValue={categoryId}
-            onValueChange={(itemValue) => setCategoryId(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Válassz kategóriát..." value="" />
-            {categories.map((cat) => (
-              <Picker.Item key={cat.id} label={cat.categoryName} value={cat.id} />
-            ))}
-          </Picker>
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-          <TextInput
-            label="Város"
-            value={city}
-            onChangeText={setCity}
-            mode="outlined"
-            outlineColor="rgba(107, 174, 161, 0.3)"
-            style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
-            theme={{ colors: { primary: '#6db2a1' } }}
-          />
-          <TextInput
-            label="Irányítószám"
-            value={zipCode}
-            onChangeText={setZipCode}
-            mode="outlined"
-            outlineColor="rgba(107, 174, 161, 0.3)"
-            style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
-            theme={{ colors: { primary: '#6db2a1' } }}
-          />
-        </View>
-
-        <TextInput
-          label="Cím (utca, házszám)"
-          value={address}
-          onChangeText={setAddress}
-          mode="outlined"
-          outlineColor="rgba(107, 174, 161, 0.3)"
-          style={[styles.input, { backgroundColor: '#FFFFFF' }]}
-          theme={{ colors: { primary: '#6db2a1' } }}
-        />
-
-        <TextInput
-          label="Leírás"
-          value={description}
-          onChangeText={setDescription}
-          mode="outlined"
-          outlineColor="rgba(107, 174, 161, 0.3)"
-          multiline
-          style={[styles.inputDescription, { backgroundColor: '#FFFFFF' }]}
-          theme={{ colors: { primary: '#6db2a1' } }}
-        />
-
-        {location && (
-          <View style={styles.mapContainer}>
-            <MapLibreGL.MapView
-              style={styles.map}
-              // a MapTiler style URL → EXPO_PUBLIC_MAPTILER_KEY kerül bele
-              styleURL={'https://api.maptiler.com/maps/streets-v2/style.json?key=W98oLQsS5yLsd7ZVfYWu'}
-
-              logoEnabled={true}     // kikapcsolja a kis MapLibre logót
-              compassEnabled={false}  // kikapcsolja az iránytűt
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.thumbnailsContainer}
             >
+              {images.map((img, idx) => (
+                <View key={idx} style={styles.thumbnailWrapper}>
+                  <TouchableOpacity onPress={() => setSelectedImageIndex(idx)}>
+                    <Image
+                      source={{ uri: img.uri }}
+                      style={[
+                        styles.thumbnail,
+                        idx === selectedImageIndex && styles.selectedThumbnail,
+                      ]}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteIcon}
+                    onPress={() => handleDeleteImage(idx)}
+                  >
+                    <MaterialCommunityIcons name="close-circle" size={20} color="red" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
 
-              <MapLibreGL.Camera
-                zoomLevel={17}
-                centerCoordinate={[
-                  location.longitude,
-                  location.latitude
-                ]}
-              />
-
-              <MapLibreGL.PointAnnotation
-                id="currentLocation"   // kötelező unique ID
-                coordinate={[
-                  location.longitude,
-                  location.latitude
-                ]}
-              />
-            </MapLibreGL.MapView>
+            <Button
+              mode="outlined"
+              icon="camera"
+              onPress={() => pickImage(images, setImages)}
+              style={styles.imageButton}
+              textColor="#6BAEA1"
+              theme={{ colors: { primary: '#6db2a1' } }}
+            >
+              Kép feltöltése (max 3)
+            </Button>
           </View>
-        )}
-        <Button
-          mode="outlined"
-          icon="crosshairs-gps"
-          onPress={() => fetchCurrentLocation(setLocation)}
-          style={styles.locationButton}
-          textColor="#6BAEA1"
-          theme={{ colors: { primary: '#6db2a1' } }}
-        >
-          Aktuális pozíció lekérése
-        </Button>
 
-        <Button
-          mode="contained"
-          onPress={handleSubmit}
-          style={styles.submitButton}
-          disabled={!formValid}
-        >
-          {loading ? <ActivityIndicator animating color="#fff" /> : 'Bejelentés beküldése'}
-        </Button>
-      </View>
-    </ScrollView>
-  </>
+          <Divider style={styles.divider} />
 
-);
+          <View style={{ margin: 16 }}>
+            <TextInput
+              label="Bejelentés megnevezése"
+              value={title}
+              onChangeText={setTitle}
+              mode="outlined"
+              outlineColor="rgba(107, 174, 161, 0.3)"
+              style={[styles.input, { backgroundColor: '#FFFFFF' }]}
+              theme={{ colors: { primary: '#6db2a1' } }}
+            />
+
+            <View style={[styles.input, styles.pickerContainer]}>
+              <Picker
+                selectedValue={categoryId}
+                onValueChange={(itemValue) => setCategoryId(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Válassz kategóriát..." value="" />
+                {categories.map((cat) => (
+                  <Picker.Item key={cat.id} label={cat.categoryName} value={cat.id} />
+                ))}
+              </Picker>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <TextInput
+                label="Város"
+                value={city}
+                onChangeText={setCity}
+                mode="outlined"
+                outlineColor="rgba(107, 174, 161, 0.3)"
+                style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
+                theme={{ colors: { primary: '#6db2a1' } }}
+              />
+              <TextInput
+                label="Irányítószám"
+                value={zipCode}
+                onChangeText={setZipCode}
+                mode="outlined"
+                outlineColor="rgba(107, 174, 161, 0.3)"
+                style={[styles.input, { backgroundColor: '#FFFFFF', flex: 1, }]}
+                theme={{ colors: { primary: '#6db2a1' } }}
+              />
+            </View>
+
+            <TextInput
+              label="Cím (utca, házszám)"
+              value={address}
+              onChangeText={setAddress}
+              mode="outlined"
+              outlineColor="rgba(107, 174, 161, 0.3)"
+              style={[styles.input, { backgroundColor: '#FFFFFF' }]}
+              theme={{ colors: { primary: '#6db2a1' } }}
+            />
+
+            <TextInput
+              label="Leírás"
+              value={description}
+              onChangeText={setDescription}
+              mode="outlined"
+              outlineColor="rgba(107, 174, 161, 0.3)"
+              multiline
+              style={[styles.inputDescription, { backgroundColor: '#FFFFFF' }]}
+              theme={{ colors: { primary: '#6db2a1' } }}
+            />
+
+            {location && (
+              <View style={styles.mapContainer}>
+                <MapLibreGL.MapView
+                  style={styles.map}
+                  // a MapTiler style URL → EXPO_PUBLIC_MAPTILER_KEY kerül bele
+                  styleURL={'https://api.maptiler.com/maps/streets-v2/style.json?key=W98oLQsS5yLsd7ZVfYWu'}
+
+                  logoEnabled={true}     // kikapcsolja a kis MapLibre logót
+                  compassEnabled={false}  // kikapcsolja az iránytűt
+                >
+
+                  <MapLibreGL.Camera
+                    zoomLevel={17}
+                    centerCoordinate={[
+                      location.longitude,
+                      location.latitude
+                    ]}
+                  />
+
+                  <MapLibreGL.PointAnnotation
+                    id="currentLocation"   // kötelező unique ID
+                    coordinate={[
+                      location.longitude,
+                      location.latitude
+                    ]}
+                  />
+                </MapLibreGL.MapView>
+              </View>
+            )}
+            <Button
+              mode="outlined"
+              icon="crosshairs-gps"
+              onPress={() => fetchCurrentLocation(setLocation)}
+              style={styles.locationButton}
+              textColor="#6BAEA1"
+              theme={{ colors: { primary: '#6db2a1' } }}
+            >
+              Aktuális pozíció lekérése
+            </Button>
+
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              style={styles.submitButton}
+              disabled={!formValid}
+            >
+              {loading ? <ActivityIndicator animating color="#fff" /> : 'Bejelentés beküldése'}
+            </Button>
+          </View>
+        </ScrollView>
+      </KeyboardAwareScrollView>
+    </>
+
+  );
 
 };
 

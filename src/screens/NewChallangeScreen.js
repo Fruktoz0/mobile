@@ -10,6 +10,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Upload } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -38,7 +39,7 @@ const NewChallengeScreen = ({ navigation }) => {
         const token = await AsyncStorage.getItem('token');
         if (token) {
             const decoded = jwtDecode(token);
-            return(decoded);
+            return (decoded);
         }
     };
 
@@ -93,149 +94,157 @@ const NewChallengeScreen = ({ navigation }) => {
         images.length > 0;
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Drag&Drop kinézet */}
-            <View style={styles.imageContainer}>
-                <TouchableOpacity
-                    style={styles.dragDropBox}
-                    onPress={() => pickImage(images, setImages)}
-                >
-                    {images.length > 0 ? (
-                        <Image
-                            source={{ uri: images[selectedImageIndex].uri }}
-                            style={styles.largePreview}
-                        />
-                    ) : (
-                        <View style={{ alignItems: 'center', justifyContent: 'center', height: 100 }}>
-                            <Upload size={32} color="#6BAEA1" />
-                            <Text style={styles.dragDropText}>Válaszd ki a képet</Text>
-                        </View>
-
-                    )}
-                </TouchableOpacity>
-
-                {images.length > 0 && (
+        <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            extraScrollHeight={20}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
+            <ScrollView style={styles.container}>
+                {/* Drag&Drop kinézet */}
+                <View style={styles.imageContainer}>
                     <TouchableOpacity
-                        style={styles.deleteIcon}
-                        onPress={() => handleDeleteImage(selectedImageIndex)}
+                        style={styles.dragDropBox}
+                        onPress={() => pickImage(images, setImages)}
                     >
-                        <MaterialCommunityIcons name="close-circle" size={24} color="red" />
+                        {images.length > 0 ? (
+                            <Image
+                                source={{ uri: images[selectedImageIndex].uri }}
+                                style={styles.largePreview}
+                            />
+                        ) : (
+                            <View style={{ alignItems: 'center', justifyContent: 'center', height: 100 }}>
+                                <Upload size={32} color="#6BAEA1" />
+                                <Text style={styles.dragDropText}>Válaszd ki a képet</Text>
+                            </View>
+
+                        )}
                     </TouchableOpacity>
-                )}
-            </View>
 
-            <Divider style={styles.divider} />
-
-            <TextInput
-                label="Kihívás címe"
-                value={title}
-                onChangeText={setTitle}
-                mode="outlined"
-                style={styles.input}
-                outlineColor="rgba(107, 174, 161, 0.3)"
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-
-            <TextInput
-                label="Leírás"
-                value={description}
-                onChangeText={setDescription}
-                mode="outlined"
-                outlineColor="rgba(107, 174, 161, 0.3)"
-                multiline
-                style={styles.inputDescription}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-
-            <TextInput
-                label="Költség pontban"
-                value={costPoints}
-                onChangeText={setCostPoints}
-                keyboardType="numeric"
-                mode="outlined"
-                outlineColor="rgba(107, 174, 161, 0.3)"
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-
-            <TextInput
-                label="Jutalom pontban"
-                value={rewardPoints}
-                onChangeText={setRewardPoints}
-                keyboardType="numeric"
-                mode="outlined"
-                outlineColor="rgba(107, 174, 161, 0.3)"
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-
-            <TextInput
-                label="Kategória"
-                value={category}
-                onChangeText={setCategory}
-                mode="outlined"
-                outlineColor="rgba(107, 174, 161, 0.3)"
-                style={styles.input}
-                theme={{ colors: { primary: '#6db2a1' } }}
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                {/* Kezdés dátuma */}
-                <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
-                    <Text>Start: {startDate.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-                {showStartPicker && (
-                    <DateTimePicker
-                        value={startDate}
-                        mode="date"
-                        onChange={(e, date) => {
-                            setShowStartPicker(false);
-                            if (date) setStartDate(date);
-                        }}
-                    />
-                )}
-
-                {/* Befejezés dátuma */}
-                <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
-                    <Text>End: {endDate.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-                {showEndPicker && (
-                    <DateTimePicker
-                        value={endDate}
-                        mode="date"
-                        onChange={(e, date) => {
-                            setShowEndPicker(false);
-                            if (date) setEndDate(date);
-                        }}
-                    />
-                )}
-
-            </View>
-
-
-            {user?.role === "admin" && (
-                <View style={[styles.input, styles.pickerContainer]}>
-                    <Picker
-                        selectedValue={institutionId}
-                        onValueChange={(val) => setInstitutionId(val)}
-                        style={styles.picker}
-                    >
-                        <Picker.Item label="Válassz intézményt..." value="" />
-                        {institutions.map((inst) => (
-                            <Picker.Item key={inst.id} label={inst.name} value={inst.id} />
-                        ))}
-                    </Picker>
+                    {images.length > 0 && (
+                        <TouchableOpacity
+                            style={styles.deleteIcon}
+                            onPress={() => handleDeleteImage(selectedImageIndex)}
+                        >
+                            <MaterialCommunityIcons name="close-circle" size={24} color="red" />
+                        </TouchableOpacity>
+                    )}
                 </View>
-            )}
 
-            <Button
-                mode="contained"
-                onPress={handleSubmit}
-                style={styles.submitButton}
-                disabled={!formValid || loading}
-            >
-                {loading ? <ActivityIndicator animating color="#fff" /> : 'Kihívás létrehozása'}
-            </Button>
-        </ScrollView>
+                <Divider style={styles.divider} />
+
+                <TextInput
+                    label="Kihívás címe"
+                    value={title}
+                    onChangeText={setTitle}
+                    mode="outlined"
+                    style={styles.input}
+                    outlineColor="rgba(107, 174, 161, 0.3)"
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+
+                <TextInput
+                    label="Leírás"
+                    value={description}
+                    onChangeText={setDescription}
+                    mode="outlined"
+                    outlineColor="rgba(107, 174, 161, 0.3)"
+                    multiline
+                    style={styles.inputDescription}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+
+                <TextInput
+                    label="Költség pontban"
+                    value={costPoints}
+                    onChangeText={setCostPoints}
+                    keyboardType="numeric"
+                    mode="outlined"
+                    outlineColor="rgba(107, 174, 161, 0.3)"
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+
+                <TextInput
+                    label="Jutalom pontban"
+                    value={rewardPoints}
+                    onChangeText={setRewardPoints}
+                    keyboardType="numeric"
+                    mode="outlined"
+                    outlineColor="rgba(107, 174, 161, 0.3)"
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+
+                <TextInput
+                    label="Kategória"
+                    value={category}
+                    onChangeText={setCategory}
+                    mode="outlined"
+                    outlineColor="rgba(107, 174, 161, 0.3)"
+                    style={styles.input}
+                    theme={{ colors: { primary: '#6db2a1' } }}
+                />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {/* Kezdés dátuma */}
+                    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+                        <Text>Start: {startDate.toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                    {showStartPicker && (
+                        <DateTimePicker
+                            value={startDate}
+                            mode="date"
+                            onChange={(e, date) => {
+                                setShowStartPicker(false);
+                                if (date) setStartDate(date);
+                            }}
+                        />
+                    )}
+
+                    {/* Befejezés dátuma */}
+                    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+                        <Text>End: {endDate.toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                    {showEndPicker && (
+                        <DateTimePicker
+                            value={endDate}
+                            mode="date"
+                            onChange={(e, date) => {
+                                setShowEndPicker(false);
+                                if (date) setEndDate(date);
+                            }}
+                        />
+                    )}
+
+                </View>
+
+
+                {user?.role === "admin" && (
+                    <View style={[styles.input, styles.pickerContainer]}>
+                        <Picker
+                            selectedValue={institutionId}
+                            onValueChange={(val) => setInstitutionId(val)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Válassz intézményt..." value="" />
+                            {institutions.map((inst) => (
+                                <Picker.Item key={inst.id} label={inst.name} value={inst.id} />
+                            ))}
+                        </Picker>
+                    </View>
+                )}
+
+                <Button
+                    mode="contained"
+                    onPress={handleSubmit}
+                    style={styles.submitButton}
+                    disabled={!formValid || loading}
+                >
+                    {loading ? <ActivityIndicator animating color="#fff" /> : 'Kihívás létrehozása'}
+                </Button>
+            </ScrollView>
+        </KeyboardAwareScrollView>
     );
 };
 
@@ -298,7 +307,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(107,174,161,0.3)',
         borderRadius: 6,
         paddingVertical: 12,
-        paddingHorizontal: 40,
+        paddingHorizontal: 25,
         marginBottom: 12,
         backgroundColor: '#fff',
     },
