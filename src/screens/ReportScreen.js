@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { Button, TextInput, Divider, ActivityIndicator } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
-import { MapLibreGL } from '../config/mapConfig';
+import { MapView, Camera, PointAnnotation } from '../config/mapConfig';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import {
@@ -213,16 +213,14 @@ const ReportScreen = () => {
 
             {location && (
               <View style={styles.mapContainer}>
-                <MapLibreGL.MapView
+                <MapView
                   style={styles.map}
-                  // a MapTiler style URL → EXPO_PUBLIC_MAPTILER_KEY kerül bele
-                  styleURL={'https://api.maptiler.com/maps/streets-v2/style.json?key=W98oLQsS5yLsd7ZVfYWu'}
-
-                  logoEnabled={true}     // kikapcsolja a kis MapLibre logót
-                  compassEnabled={false}  // kikapcsolja az iránytűt
+                    mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                  logoEnabled={true}    
+                  compassEnabled={false}  
                 >
 
-                  <MapLibreGL.Camera
+                  <Camera
                     zoomLevel={17}
                     centerCoordinate={[
                       location.longitude,
@@ -230,14 +228,14 @@ const ReportScreen = () => {
                     ]}
                   />
 
-                  <MapLibreGL.PointAnnotation
+                  <PointAnnotation
                     id="currentLocation"   // kötelező unique ID
                     coordinate={[
                       location.longitude,
                       location.latitude
                     ]}
                   />
-                </MapLibreGL.MapView>
+                </MapView>
               </View>
             )}
             <Button

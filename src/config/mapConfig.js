@@ -1,4 +1,4 @@
-import * as MapLibreGL from '@maplibre/maplibre-react-native';
-MapLibreGL.setAccessToken(null);
+import MapLibreGL, { MapView, Camera, PointAnnotation } from '@maplibre/maplibre-react-native';
 
-export { MapLibreGL };
+
+export { MapLibreGL, MapView, Camera, PointAnnotation };

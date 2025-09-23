@@ -13,7 +13,6 @@ import { API_URL } from '../config/apiConfig';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-
   const [activeInst, setActiveInst] = useState("all");
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
@@ -37,6 +36,7 @@ const HomeScreen = () => {
       const newsData = await getAllNews();
       setNews(newsData);
     } catch (err) {
+      console.error(err)
     } finally {
       setLoadingNews(false);
     }
@@ -46,7 +46,7 @@ const HomeScreen = () => {
     setLoadingInst(true);
     try {
       const instData = await getAllInstitutions();
-      setInstitutions([{ id: 'all', name: "Összes", logo: "" }, ...instData]);
+      setInstitutions([{ id: 'all', name: "Összes", logoUrl: "" }, ...instData]);
     } catch (err) {
       console.log("Intézmények betöltése sikertelen:", err);
     } finally {
@@ -70,9 +70,9 @@ const HomeScreen = () => {
   // Értesítések kezelése
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground push:', remoteMessage);
+      console.log('Foreground push!', remoteMessage);
 
-      if (!remoteMessage.notification) {
+      if (remoteMessage.notification) {
         await Notifications.scheduleNotificationAsync({
           content: {
             title: remoteMessage.notification?.title,
@@ -119,7 +119,6 @@ const HomeScreen = () => {
           </ScrollView>
         </View>
       </View>
-
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
@@ -135,11 +134,17 @@ const HomeScreen = () => {
 
               <View style={styles.cardHeader}>
                 <View style={styles.logoWrap}>
-                  <Image source={{ uri: inst.logoUrl }} style={styles.logo} />
+                  <Image
+                    source={
+                      inst?.logoUrl
+                        ? { uri: inst?.logoUrl }
+                        : require("../../assets/images/image_placeholder.png")
+                    }
+                    style={styles.logo} />
                 </View>
                 <Text style={styles.cardInst}>{inst?.name ?? "Intézmény"}</Text>
               </View>
-              <View style={styles.cardContent}>             
+              <View style={styles.cardContent}>
                 {item.imageUrl && (
                   <Image source={{ uri: `${API_URL}/${item.imageUrl}` }} style={styles.newsImage} />
                 )}
@@ -163,6 +168,14 @@ const HomeScreen = () => {
             </TouchableOpacity>
           );
         }}
+
+        ListEmptyComponent={
+          !loadingNews ? (
+            <Text style={{ textAlign: 'center', marginTop: 24, color: '#666' }}>
+              Nincs megjeleníthető hír.
+            </Text>
+          ) : null
+        }
       />
 
       {user && (user.role === "admin" || user.role === "institution") && (
@@ -285,7 +298,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   cardContent: {
-    flexDirection: "row",   
+    flexDirection: "row",
     alignItems: "flex-start",
     marginTop: 8,
   },

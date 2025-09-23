@@ -5,9 +5,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { Avatar, Button, Divider, Dialog, Portal, TextInput, HelperText, List, Menu } from 'react-native-paper'
 import Carousel from 'react-native-reanimated-carousel';
-import { MapLibreGL } from '../config/mapConfig';
+import { MapView, Camera, PointAnnotation } from '../config/mapConfig';
 import { confirmReport, getCategoriesByInstitution, getForwardLogs, getInstitutions, getReportById } from '../services/reportService'
-import * as Location from 'expo-location';
 import { useState, useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -273,28 +272,21 @@ const ReportDetailScreen = ({ route }) => {
 
                 <View style={styles.mapContainer}>
                     {report?.locationLat && report?.locationLng && (
-                        <MapLibreGL.MapView
+                        <MapView
                             style={styles.map}
-                            styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                            mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
                             logoEnabled={false}
                             compassEnabled={false}
                         >
-                            <MapLibreGL.Camera
+                            <Camera
                                 zoomLevel={16}
-                                centerCoordinate={[
-                                    Number(report.locationLng),
-                                    Number(report.locationLat)
-                                ]}
+                                centerCoordinate={[Number(report.locationLng), Number(report.locationLat)]}
                             />
-                            <MapLibreGL.PointAnnotation
+                            <PointAnnotation
                                 id="reportLocation"
-                                coordinate={[
-                                    Number(report.locationLng),
-                                    Number(report.locationLat),
-                                ]}
+                                coordinate={[Number(report.locationLng), Number(report.locationLat)]}
                             />
-
-                        </MapLibreGL.MapView>
+                        </MapView>
                     )}
                 </View>
                 <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 8, paddingHorizontal: -14 }}>
