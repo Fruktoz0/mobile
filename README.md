@@ -2,6 +2,7 @@
 <p >
   <img src="assets/images/tisztavaros_logo.png" alt="Tiszta Város logó" width="220"/>
 </p>
+
 # Tiszta Város Mobilalkalmazás
 
 Ez a mobilalkalmazás a **Tiszta Város** projekt része, melynek célja, hogy a lakosok egyszerűen jelezhessék a városban észlelt problémákat. Az alkalmazás **React Native** alapokra épül, és **Expo** keretrendszerrel futtatható, így könnyen telepíthető és kipróbálható mobil eszközökön. A felhasználói felület kialakítása egyszerű és áttekinthető, hogy technikai tudástól függetlenül bárki használhassa.
